@@ -18,8 +18,16 @@ describe("functional", () ->
     
     it("should enable a function to be partially applied", () ->
       add = (a, b, c) -> a + b + c
-      add = add.autoCurry()
-      expect(add(1)(1)(1)).toEqual(3)
+      implicit = add.autoCurry()
+      explicit = add.autoCurry(3)
+      expect(implicit(1)(1)(1)).toEqual(3)
+      expect(explicit(1)(1)(1)).toEqual(3)
+      expect(implicit(1, 1)(1)).toEqual(3)
+      expect(explicit(1, 1)(1)).toEqual(3)
+      expect(implicit(1)(1, 1)).toEqual(3)
+      expect(explicit(1)(1, 1)).toEqual(3)
+      expect(implicit(1, 1, 1)).toEqual(3)
+      expect(explicit(1, 1, 1)).toEqual(3)
     )
   )
 )

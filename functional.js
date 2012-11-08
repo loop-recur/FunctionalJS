@@ -112,7 +112,7 @@
     }
     return result;
   }
-  map.autoCurry();
+  map = map.autoCurry();
 
   
   sequence=function(){var fns=map(Function.toFunction,arguments),arglen=fns.length;return function(){for(var i=0;i<arglen;i++)
