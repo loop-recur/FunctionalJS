@@ -1,48 +1,82 @@
-// curry/auto is from wu.js
-(function() {
-  var toArray = function(x) {
-    return Array.prototype.slice.call(x);
-  }
-  
-  var curry = function (fn /* variadic number of args */) {
-         var args = Array.prototype.slice.call(arguments, 1);
-         var f = function () {
-             return fn.apply(this, args.concat(toArray(arguments)));
-         };
-         return f;
-     };
+typeof window == 'undefined' && (window = {});
 
-  var autoCurry = function (fn, numArgs) {
-         numArgs = numArgs || fn.length;
-         var f = function () {
-             if (arguments.length < numArgs) {
-                 return numArgs - arguments.length > 0 ?
-                     autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
-                                  numArgs - arguments.length) :
-                     curry.apply(this, [fn].concat(toArray(arguments)));
-             }
-             else {
-                 return fn.apply(this, arguments);
-             }
-         };
-         f.toString = function(){ return fn.toString(); };
-         f.curried = true;
-         return f;
-     };
+var Functional = window.Functional || {};
+Functional.install = function (except) {
+  var source = Functional 
+    , target = window
+    ;
+  for(var name in source) {
+    name == 'install' || name.charAt(0) == '_' || except && name in except || {}[name] || (target[name] = source[name]);
+  }  
+}
+
+// curry/auto is from wu.js
+(function () {
+  var toArray, curry, autoCurry;
+  
+  toArray = function (x) {
+    return Array.prototype.slice.call(x);
+  };
+  
+  curry = function (fn /* variadic number of args */) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    var f = function () {
+      return fn.apply(this, args.concat(toArray(arguments)));
+    };
+    return f;
+  };
+
+  autoCurry = function (fn, numArgs) {
+    numArgs = numArgs || fn.length;
+    var f = function () {
+      if (arguments.length < numArgs) {
+        return numArgs - arguments.length > 0 ?
+          autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
+            numArgs - arguments.length) :
+              curry.apply(this, [fn].concat(toArray(arguments)));
+      }
+      else {
+        return fn.apply(this, arguments);
+      }
+    };
+
+    f.toString = function () { return fn.toString(); };
+    f.curried = true;
+    return f;
+  };
      
-     Function.prototype.autoCurry = function(n) {
-       return autoCurry(this, n);
-     }
+  Function.prototype.autoCurry = function (n) {
+    return autoCurry(this, n);
+  };
+
 })();
 
+compose = function () {
+  var fns = map(Function.toFunction, arguments)
+    , arglen = fns.length
+    , i;
+  return function () {
+    for (i = arglen; --i>=0;) {
+      arguments = [fns[i].apply(this,arguments)];
+    }
+    return arguments[0];
+  };
+};
 
-// set timeout works for titanium env, which i'm typically in.  Switch with different strategies if needed.
-compose_p=function(){
-	var fns = map(Function.toFunction,arguments)
-	, arglen = fns.length;
+composel = function () { 
+  var args = Array.slice(arguments, 1).reverse(); 
+  compose.apply(args); 
+};
+
+// setTimeout works for titanium env, which i'm typically in.
+// Switch with different strategies if needed.
+compose_p = function () {
+	var fns = map(Function.toFunction, arguments)
+	  , arglen = fns.length;
 	
-	return function(x){
-		for(var i=arglen;--i>=0;) {
+	return function (x) {
+    var i;
+		for (i = arglen; --i >= 0;) {
 			setTimeout(fns[i].p(x), 100);
 		}
 
@@ -50,40 +84,36 @@ compose_p=function(){
 	}
 }
 
-memoize = function( fn ) {  
-    return function () {  
-        var args = Array.prototype.slice.call(arguments),  
-            hash = "",  
-            i = args.length;  
-        currentArg = null;  
-        while (i--) {  
-            currentArg = args[i];  
-            hash += (currentArg === Object(currentArg)) ?  
-            JSON.stringify(currentArg) : currentArg;  
-            fn.memoize || (fn.memoize = {});  
-        }  
-        return (hash in fn.memoize) ? fn.memoize[hash] :  
-        fn.memoize[hash] = fn.apply(this, args);  
-    };  
+memoize = function (fn) {  
+  var args = Array.prototype.slice.call(arguments)
+    , hash = ""  
+    , i = args.length
+    , currentArg = null;
+
+  return function () {  
+    while (i--) {  
+      currentArg = args[i];  
+      hash += (currentArg === Object(currentArg)) ? JSON.stringify(currentArg)
+            : currentArg;  
+      fn.memoize || (fn.memoize = {});  
+    }  
+    return (hash in fn.memoize) ? fn.memoize[hash] : 
+           fn.memoize[hash] = fn.apply(this, args);  
+  };  
 }
 
-typeof window=='undefined'&&(window={});var Functional=window.Functional||{};Functional.install=function(except){var source=Functional,target=window;for(var name in source)
-name=='install'||name.charAt(0)=='_'||except&&name in except||{}[name]||(target[name]=source[name]);}
-compose=function(){var fns=map(Function.toFunction,arguments),arglen=fns.length;return function(){for(var i=arglen;--i>=0;)
-arguments=[fns[i].apply(this,arguments)];return arguments[0];}}
-composel=function(){ var args=Array.slice(arguments,1).reverse(); compose.apply(args); }
 sequence=function(){var fns=map(Function.toFunction,arguments),arglen=fns.length;return function(){for(var i=0;i<arglen;i++)
 arguments=[fns[i].apply(this,arguments)];return arguments[0];}}
 map=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=new Array(len);for(var i=0;i<len;i++)
 result[i]=fn.apply(null,[sequence[i],i]);return result;}.autoCurry();
-//reduce=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=0;i<len;i++)
-//result=fn.apply(null,[result,sequence[i]]);return result;}.autoCurry();
+reduce=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=0;i<len;i++)
+result=fn.apply(null,[result,sequence[i]]);return result;}.autoCurry();
 select=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=[];for(var i=0;i<len;i++){var x=sequence[i];fn.apply(null,[x,i])&&result.push(x);}
 return result;}.autoCurry();
 guard=function(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
 flip = function(f){return f.flip(); }
 filter=select;
-//foldl=reduce;
+foldl=reduce;
 foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
 result=fn.apply(null,[sequence[i],result]);return result;}
 annd=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=true;for(var i=0;i<arglen;i++)
