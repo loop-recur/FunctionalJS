@@ -19,7 +19,7 @@
     "node": "*"
   },
   "scripts": {
-    "test": "jasmine-node --coffee"
+    "test": "jasmine-node --coffee specs"
   },
   "main": "./functional.js"
 }
