@@ -36,11 +36,10 @@ describe("functional", () ->
 
   describe("compose", () ->
     addOne = (x) -> x + 1
-    isOdd = (x) -> if x % 2 == 0 then false else true
-    nextIsOdd = compose(isOdd, addOne)
+    times2 = (x) -> x * 2
     
     it("composes functions", () ->
-      expect(nextIsOdd(2)).toEqual(true)
+      expect(compose(addOne, times2)(3)).toEqual(7)
     )
   )
 
