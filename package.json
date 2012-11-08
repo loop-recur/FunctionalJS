@@ -1,0 +1,14 @@
+{ "author": "Brian Lonsdorf <brian@loop-recur.com>"
+, "name": "functionaljs"
+, "version": "0.1.0"
+, "devDependencies": {
+    "jasmine-node": "*"
+  }
+, "engines": {
+    "node": "*"
+  }
+, "scripts": {
+    "test": "jasmine-node --coffee"
+  }
+, "main": "./functional.js"
+}
