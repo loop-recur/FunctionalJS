@@ -37,8 +37,12 @@ describe("functional", () ->
   describe("map", () ->
     addOne = (x) -> x + 1
 
-    it("should return correct result when iterating over an array", () ->
+    it("returns the correct result when iterating over an array", () ->
       expect(map(addOne, [1, 2, 3])).toEqual([2, 3, 4])
+    )
+
+    it("partially applies arguments", () ->
+      expect(map(addOne)([1, 2, 3])).toEqual([2, 3, 4])
     )
   )
 
