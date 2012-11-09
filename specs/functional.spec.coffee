@@ -34,6 +34,14 @@ describe("functional", () ->
     )
   )
 
+  describe("map", () ->
+    addOne = (x) -> x + 1
+
+    it("should return correct result when iterating over an array", () ->
+      expect(map(addOne, [1, 2, 3])).toEqual([2, 3, 4])
+    )
+  )
+
   describe("compose", () ->
     addOne = (x) -> x + 1
     times2 = (x) -> x * 2

@@ -53,7 +53,6 @@
     var length = sequence.length
       , result = new Array(length)
       , i;
-
     fn = Function.toFunction(fn);
     for (i=0; i<length; i++) {
       result[i] = fn.apply(null, [sequence[i], i]);
@@ -455,6 +454,7 @@
   // Add functions to the "functional" namespace
   functional.compose = compose;
   functional.sequence = sequence;
+  functional.map = map;
   
   // Add alias to "functional" namespace
   functional.id = I;
