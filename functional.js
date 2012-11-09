@@ -9,6 +9,16 @@
     , functional = {}
     , oldFunctional = {};
 
+  // Add slice() method to JavaScript's built-in Array object, if it
+  // doesn't already exist.
+  if (!Array.slice) { 
+    Array.slice = (function (slice) {
+      return function (object) {
+        return slice.apply(object, slice.call(arguments, 1));
+      };
+    })(Array.prototype.slice);
+  }
+
   // Add autoCurry() to the Function prototype. The autoCurry() 
   // method is a Function decorator that returns a duplicate of 
   // the function, but which can now be partially applied.
@@ -81,11 +91,6 @@
       }
       return arguments[0];
     }
-  }
-
-  function composel() { 
-    var args = Array.slice(arguments, 1).reverse(); 
-    compose.apply(args); 
   }
 
   // setTimeout works for titanium env, which i'm typically in.
@@ -366,15 +371,6 @@
   
   Function.toFunction = function (value) { return value.toFunction();}
   
-  // Add slice() method to JavaScript's built-in Array object, if it doesn't
-  // already exist.
-  if (!Array.slice) { 
-    Array.slice = (function (slice) {
-      return function (object) {
-        return slice.apply(object, slice.call(arguments, 1));
-      };
-    })(Array.prototype.slice);
-  }
   
   String.prototype.lambda = function () {
     var params=[]
@@ -452,9 +448,9 @@
   // delete _initialFunctionPrototypeState;
 
   // Add functions to the "functional" namespace
+  functional.map = map;
   functional.compose = compose;
   functional.sequence = sequence;
-  functional.map = map;
   
   // Add alias to "functional" namespace
   functional.id = I;

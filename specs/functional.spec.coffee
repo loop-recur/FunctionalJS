@@ -50,7 +50,7 @@ describe("functional", () ->
     addOne = (x) -> x + 1
     times2 = (x) -> x * 2
     
-    it("composes functions, applies functions right to left", () ->
+    it("composes functions, and applies functions right to left", () ->
       expect(compose(addOne, times2)(3)).toEqual(7)
     )
   )
@@ -59,7 +59,7 @@ describe("functional", () ->
     addOne = (x) -> x + 1
     times2 = (x) -> x * 2
 
-    it("composes functions, applies functions left to right", () ->
+    it("composes functions, and applies functions left to right", () ->
       expect(sequence(addOne, times2)(3)).toEqual(8)
     )
   )
