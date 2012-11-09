@@ -47,20 +47,24 @@ describe("functional", () ->
   )
 
   describe("compose", () ->
+    sum = (x, y) -> x + y
     addOne = (x) -> x + 1
     times2 = (x) -> x * 2
     
     it("composes functions, and applies functions right to left", () ->
       expect(compose(addOne, times2)(3)).toEqual(7)
+      expect(compose(addOne, times2, sum)(1, 2)).toEqual(7)
     )
   )
 
   describe("sequence", () ->
+    sum = (x, y) -> x + y
     addOne = (x) -> x + 1
     times2 = (x) -> x * 2
 
     it("composes functions, and applies functions left to right", () ->
-      expect(sequence(addOne, times2)(3)).toEqual(8)
+      expect(sequence(times2, addOne)(3)).toEqual(7)
+      expect(sequence(sum, times2, addOne)(1, 2)).toEqual(7)
     )
   )
 
