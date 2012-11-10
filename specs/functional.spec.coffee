@@ -87,4 +87,21 @@ describe("functional", () ->
       expect(reduce(sum, 0)([1, 2, 3])).toEqual(6)
     )
   )
+
+  describe("select", () ->
+    isEven = (x) -> x % 2 == 0
+
+    it("filters an array based on a criteria (function)", () ->
+      expect(select(isEven, [1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
+    )
+    
+    it("can be partially applied", () ->
+      expect(select(isEven)([1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
+    )
+
+    it("is aliased as 'filter'", () ->
+      expect(filter(isEven, [1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
+      expect(filter(isEven)([1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
+    )
+  )
 )

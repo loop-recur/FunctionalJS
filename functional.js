@@ -136,11 +136,20 @@
   }
   reduce = reduce.autoCurry();
   
-  select=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=[];for(var i=0;i<len;i++){var x=sequence[i];fn.apply(null,[x,i])&&result.push(x);}
-  return result;}.autoCurry();
+  function select(fn,sequence) {
+    fn=Function.toFunction(fn);
+    var len=sequence.length,
+        result=[];
+    for(var i=0;i<len;i++) {
+      var x=sequence[i];
+      fn.apply(null,[x,i])&&result.push(x);
+    }
+    return result;
+  }
+  select = select.autoCurry();
+  
   guard=function(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
   flip = function(f){return f.flip(); }
-  filter=select;
   foldl=reduce;
   foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
   result=fn.apply(null,[sequence[i],result]);return result;}
@@ -461,6 +470,8 @@
   functional.compose_p = compose_p;
   functional.memoize = memoize;
   functional.reduce = reduce;
+  functional.select = select;
+  functional.filter = select;
   
   // Add alias to "functional" namespace
   functional.id = I;
