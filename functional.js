@@ -125,10 +125,12 @@
   }
 
   function reduce(fn,init,sequence) {
-    fn=Function.toFunction(fn);
-    var len=sequence.length,result=init;
-    for(var i=0;i<len;i++) {
-      result=fn.apply(null,[result,sequence[i]]);
+    var len = sequence.length
+      , result = init
+      , i;
+    fn = Function.toFunction(fn);
+    for(i = 0; i < len; i++) {
+      result = fn.apply(null, [result, sequence[i]]);
     }
     return result;
   }
