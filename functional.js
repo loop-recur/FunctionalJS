@@ -136,19 +136,21 @@
   }
   reduce = reduce.autoCurry();
   
-  function select(fn,sequence) {
-    fn=Function.toFunction(fn);
-    var len=sequence.length,
-        result=[];
-    for(var i=0;i<len;i++) {
-      var x=sequence[i];
-      fn.apply(null,[x,i])&&result.push(x);
+  function select(fn, sequence) {
+    var len = sequence.length,
+        result = [],
+        i, x;
+    fn = Function.toFunction(fn);
+    for(i = 0; i < len; i++) {
+      x = sequence[i];
+      fn.apply(null, [x, i]) && result.push(x);
     }
     return result;
   }
   select = select.autoCurry();
   
-  guard=function(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
+  guard=function guard(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
+
   flip = function(f){return f.flip(); }
   foldl=reduce;
   foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
