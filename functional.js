@@ -124,8 +124,16 @@
     };  
   }
 
-  reduce=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=0;i<len;i++)
-  result=fn.apply(null,[result,sequence[i]]);return result;}.autoCurry();
+  function reduce(fn,init,sequence) {
+    fn=Function.toFunction(fn);
+    var len=sequence.length,result=init;
+    for(var i=0;i<len;i++) {
+      result=fn.apply(null,[result,sequence[i]]);
+    }
+    return result;
+  }
+  reduce = reduce.autoCurry();
+  
   select=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=[];for(var i=0;i<len;i++){var x=sequence[i];fn.apply(null,[x,i])&&result.push(x);}
   return result;}.autoCurry();
   guard=function(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
@@ -450,6 +458,7 @@
   functional.sequence = sequence;
   functional.compose_p = compose_p;
   functional.memoize = memoize;
+  functional.reduce = reduce;
   
   // Add alias to "functional" namespace
   functional.id = I;

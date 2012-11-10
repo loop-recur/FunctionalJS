@@ -78,4 +78,13 @@ describe("functional", () ->
     ) 
   )
 
+  describe("reduce", () ->
+    it("can sum up an array", () ->
+      expect(reduce(sum, 0, [1, 2, 3])).toEqual(6)
+    )
+    it("can partially apply arguments", () ->
+      expect(reduce(sum)(0, [1, 2, 3])).toEqual(6)
+      expect(reduce(sum, 0)([1, 2, 3])).toEqual(6)
+    )
+  )
 )
