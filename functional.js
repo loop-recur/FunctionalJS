@@ -98,32 +98,29 @@
   function compose_p() {
     var fns = map(Function.toFunction, arguments)
       , arglen = fns.length;
-    
     return function (x) {
       var i;
       for (i = arglen; --i >= 0;) {
         setTimeout(fns[i].p(x), 100);
       }
-
       return arguments[0];
     }
   }
 
   function memoize(fn) {  
-    var args = Array.prototype.slice.call(arguments)
-      , hash = ""  
-      , i = args.length
-      , currentArg = null;
-
     return function () {  
-      while (i--) {  
-        currentArg = args[i];  
-        hash += (currentArg === Object(currentArg)) ? JSON.stringify(currentArg)
-              : currentArg;  
-        fn.memoize || (fn.memoize = {});  
-      }  
-      return (hash in fn.memoize) ? fn.memoize[hash] : 
-             fn.memoize[hash] = fn.apply(this, args);  
+        var args = Array.prototype.slice.call(arguments),  
+            hash = "",  
+            i = args.length;  
+        currentArg = null;  
+        while (i--) {  
+            currentArg = args[i];  
+            hash += (currentArg === Object(currentArg)) ?  
+            JSON.stringify(currentArg) : currentArg;  
+            fn.memoize || (fn.memoize = {});  
+        }  
+        return (hash in fn.memoize) ? fn.memoize[hash] :  
+        fn.memoize[hash] = fn.apply(this, args);  
     };  
   }
 
@@ -451,6 +448,8 @@
   functional.map = map;
   functional.compose = compose;
   functional.sequence = sequence;
+  functional.compose_p = compose_p;
+  functional.memoize = memoize;
   
   // Add alias to "functional" namespace
   functional.id = I;
