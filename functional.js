@@ -152,7 +152,6 @@
   guard=function guard(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
 
   flip = function(f){return f.flip(); }
-  foldl=reduce;
   foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
   result=fn.apply(null,[sequence[i],result]);return result;}
   annd=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=true;for(var i=0;i<arglen;i++)
@@ -472,6 +471,7 @@
   functional.compose_p = compose_p;
   functional.memoize = memoize;
   functional.reduce = reduce;
+  functional.foldl = reduce;
   functional.select = select;
   functional.filter = select;
   

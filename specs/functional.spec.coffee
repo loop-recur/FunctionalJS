@@ -86,6 +86,12 @@ describe("functional", () ->
       expect(reduce(sum)(0, [1, 2, 3])).toEqual(6)
       expect(reduce(sum, 0)([1, 2, 3])).toEqual(6)
     )
+
+    it("is aliased as 'foldl'", () ->
+      expect(foldl(sum, 0, [1, 2, 3])).toEqual(6)
+      expect(foldl(sum)(0, [1, 2, 3])).toEqual(6)
+      expect(foldl(sum, 0)([1, 2, 3])).toEqual(6)
+    )
   )
 
   describe("select", () ->
@@ -103,5 +109,9 @@ describe("functional", () ->
       expect(filter(isEven, [1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
       expect(filter(isEven)([1, 2, 3, 4, 5, 6])).toEqual([2, 4, 6])
     )
+  )
+
+  xdescribe("guard", () ->
+    
   )
 )
