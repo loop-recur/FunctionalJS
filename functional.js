@@ -159,7 +159,8 @@
     }
   }
 
-  flip = function(f){return f.flip(); }
+  function flip(f) { return f.flip(); }
+
   foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
   result=fn.apply(null,[sequence[i],result]);return result;}
   annd=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=true;for(var i=0;i<arglen;i++)
@@ -485,6 +486,7 @@
   functional.select = select;
   functional.filter = select;
   functional.guard = guard;
+  functional.flip = flip;
   
   // Add aliases to "functional" namespace
   functional.id = I;

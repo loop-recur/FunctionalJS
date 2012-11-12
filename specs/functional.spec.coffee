@@ -5,6 +5,7 @@ describe("functional", ->
   sum = (x, y) -> x + y
   addOne = (x) -> x + 1
   times2 = (x) -> x * 2
+  subtract = (x, y) -> x - y
 
   it("should load properly using different module schemes", ->
     expect(functional).not.toBeUndefined()
@@ -121,6 +122,12 @@ describe("functional", ->
       expect(guard(id, addOne, times2)(3)).toEqual(4)
       expect(guard(id, addOne, times2)(0)).toEqual(0)
     )
+  )
 
+  describe("flip", ->
+    it("returns a function with the first two arguments flipped", ->
+      expect(subtract(1, 2)).toEqual(-1)
+      expect(flip(subtract)(1, 2)).toEqual(1)
+    )
   )
 )
