@@ -63,12 +63,6 @@ describe("functional", ->
     )
   )
 
-  xdescribe("compose_p", ->
-    xit("runs functions in parallel", ->
-      # TODO: add assertion
-    )
-  )
-
   describe("memoize", ->
     fib = (n) -> if n < 2 then n else fib(n - 1) + fib(n - 2)
     fastFib = memoize(fib)

@@ -94,20 +94,6 @@
     };
   }
 
-  // setTimeout works for titanium env, which i'm typically in.
-  // Switch with different strategies if needed.
-  function compose_p() {
-    var fns = map(Function.toFunction, arguments),
-        arglen = fns.length;
-    return function (x) {
-      var i;
-      for (i = arglen; --i >= 0;) {
-        setTimeout(fns[i].p(x), 100);
-      }
-      return arguments[0];
-    };
-  }
-
   function memoize(fn) {  
     return function () {  
         var args = Array.prototype.slice.call(arguments),  
@@ -576,7 +562,6 @@
   functional.map = map.autoCurry();
   functional.compose = compose;
   functional.sequence = sequence;
-  functional.compose_p = compose_p;
   functional.memoize = memoize;
   functional.reduce = reduce.autoCurry();
   functional.foldl = reduce.autoCurry();
