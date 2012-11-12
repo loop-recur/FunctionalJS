@@ -130,4 +130,14 @@ describe("functional", ->
       expect(flip(subtract)(1, 2)).toEqual(1)
     )
   )
+
+  describe("foldr", ->
+    it("can sum up an array", ->
+      expect(foldr(sum, 0, [1, 2, 3])).toEqual(6)
+    )
+    it("can partially apply arguments", ->
+      expect(foldr(sum)(0, [1, 2, 3])).toEqual(6)
+      expect(foldr(sum, 0)([1, 2, 3])).toEqual(6)
+    )
+  )
 )

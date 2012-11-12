@@ -161,8 +161,18 @@
 
   function flip(f) { return f.flip(); }
 
-  foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
-  result=fn.apply(null,[sequence[i],result]);return result;}
+  function foldr(fn, init, sequence) {
+    var len = sequence.length,
+        result = init,
+        i;
+    fn = Function.toFunction(fn);
+    for(i = len; --i >= 0;) {
+      result = fn.apply(null, [sequence[i],result]);
+    }
+    return result;
+  }
+  foldr = foldr.autoCurry();
+
   annd=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=true;for(var i=0;i<arglen;i++)
   if(!(value=args[i].apply(this,arguments)))
   break;return value;}}
@@ -487,6 +497,7 @@
   functional.filter = select;
   functional.guard = guard;
   functional.flip = flip;
+  functional.foldr = foldr;
   
   // Add aliases to "functional" namespace
   functional.id = I;
