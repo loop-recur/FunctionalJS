@@ -14,7 +14,7 @@ describe("functional", ->
 
   describe("expose", ->
     it("can attach functions to the global namespace", ->
-      functional.expose()
+      expect(typeof functional.expose).toEqual('function')
       expect(typeof compose).toEqual('function')
     )
   )
