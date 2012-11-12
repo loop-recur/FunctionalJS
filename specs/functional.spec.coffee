@@ -219,4 +219,10 @@ describe("functional", ->
       expect(pluck('age')({ age: 23 })).toEqual(23)
     )
   )
+
+  describe("until", ->
+    it("Returns a function that applies first, an argument, then each retur value to a function until a condition is met", ->
+      expect(untill('>10', '2*')(1)).toEqual(16)
+    )
+  )
 )
