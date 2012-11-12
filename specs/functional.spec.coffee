@@ -246,5 +246,15 @@ describe("functional", ->
     )
   )
 
-  
+ describe("K", ->
+  it("Returns a constant function that returns whatever argument is passed in", ->
+    expect(K(1)(2)).toEqual(1)
+    expect(K('sweet')('foo')).toEqual('sweet')
+  )
+
+  it("has an alias of 'constfn'", ->
+    expect(constfn(1)(2)).toEqual(1)
+    expect(constfn('sweet')('foo')).toEqual('sweet')
+  )
+ ) 
 )
