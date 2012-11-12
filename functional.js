@@ -219,7 +219,13 @@
     return value;
   }
 
-  not=function(fn){fn=Function.toFunction(fn);return function(){return!fn.apply(null,arguments);}}
+  function not(fn) {
+    fn = Function.toFunction(fn);
+    return function () {
+      return !fn.apply(null, arguments);
+    }
+  }
+
   equal=function(){var arglen=arguments.length,args=map(Function.toFunction,arguments);if(!arglen)return K(true);return function(){var value=args[0].apply(this,arguments);for(var i=1;i<arglen;i++)
   if(value!=args[i].apply(this,args))
   return false;return true;}}
@@ -539,6 +545,8 @@
   functional.orr = or; // alias or() for coffescript
   functional.some = some.autoCurry();
   functional.every = every.autoCurry();
+  functional.not = not;
+  functional.nott = not; // alias not() for coffeescript
 
   // Add aliases to "functional" namespace
   functional.id = I;

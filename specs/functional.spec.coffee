@@ -182,4 +182,11 @@ describe("functional", ->
       expect(every('<10')(xs)).toEqual(true)
     )
   )
+
+  describe("not", ->
+    it("returns a function that returns true when the function/argument returns false", ->
+      expect(nott('<2')(3)).toEqual(true)
+      expect(nott('<2')(1)).toEqual(false)
+    )
+  )
 )
