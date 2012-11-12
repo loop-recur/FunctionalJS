@@ -257,4 +257,11 @@ describe("functional", ->
     expect(constfn('sweet')('foo')).toEqual('sweet')
   )
  ) 
+
+ describe("S", ->
+  it("Returns the composition of two functions, applying the first function to the result of the second, AND the original arguments", ->
+    expect(S('+', '_ a b -> a*b')(2,3,4)).toEqual(14)
+  )
+ )
+
 )

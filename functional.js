@@ -600,13 +600,11 @@
   functional.until = until.autoCurry();
   functional.untill = until.autoCurry();
   functional.zip = zip;
-
   functional.I = I;
-  functional.K = K;
-
-  // Add aliases to "functional" namespace
   functional.id = I;
+  functional.K = K;
   functional.constfn = K;
+  functional.S = S;
 
   // Detect free variable "global" and use it as "window"
   if (freeGlobal.global === freeGlobal) {
