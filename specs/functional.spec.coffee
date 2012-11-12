@@ -233,4 +233,18 @@ describe("functional", ->
       )
     )
   )
+
+  describe("I", ->
+    it("is the identity function, returning whatever argument is passed in", ->
+      expect(I(1)).toEqual(1);
+      expect(I('sweet')).toEqual('sweet')
+    )
+
+    it("has an alias of 'id'", ->
+      expect(id(1)).toEqual(1)
+      expect(id('sweet')).toEqual('sweet')
+    )
+  )
+
+  
 )
