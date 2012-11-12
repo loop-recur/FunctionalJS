@@ -207,10 +207,17 @@
     return value;
   }
 
-  function every(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=true;for(var i=0;i<len;i++)
-  if(!(value=fn.call(null,sequence[i])))
-  break;return value;}
-  every = every.autoCurry();
+  function every(fn, sequence) {
+    fn = Function.toFunction(fn);
+    var len = sequence.length,
+        value = true,
+        i;
+    for (i = 0; i < len; i++) {
+      if (!(value = fn.call(null, sequence[i])))
+        break;
+    }
+    return value;
+  }
 
   not=function(fn){fn=Function.toFunction(fn);return function(){return!fn.apply(null,arguments);}}
   equal=function(){var arglen=arguments.length,args=map(Function.toFunction,arguments);if(!arglen)return K(true);return function(){var value=args[0].apply(this,arguments);for(var i=1;i<arglen;i++)
