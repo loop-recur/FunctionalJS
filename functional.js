@@ -64,7 +64,7 @@
         result = new Array(length),
         i;
     fn = Function.toFunction(fn);
-    for (i=0; i<length; i++) {
+    for (i = 0; i < length; i++) {
       result[i] = fn.apply(null, [sequence[i], i]);
     }
     return result;
@@ -74,7 +74,8 @@
     var fns = map(Function.toFunction, arguments),
         arglen = fns.length;
     return function () {
-      for (var i = arglen; --i>=0;) {
+      var i;
+      for (i = arglen; --i>=0;) {
         arguments = [fns[i].apply(this, arguments)];
       }
       return arguments[0];
@@ -85,11 +86,12 @@
     var fns = map(Function.toFunction, arguments),
         arglen = fns.length;
     return function () {
-      for(var i = 0; i < arglen; i++) {
+      var i;
+      for (i = 0; i < arglen; i++) {
         arguments = [fns[i].apply(this, arguments)];
       }
       return arguments[0];
-    }
+    };
   }
 
   // setTimeout works for titanium env, which i'm typically in.
@@ -103,7 +105,7 @@
         setTimeout(fns[i].p(x), 100);
       }
       return arguments[0];
-    }
+    };
   }
 
   function memoize(fn) {  
@@ -153,7 +155,7 @@
     return function () {
       return (guard.apply(this, arguments) ? fn : otherwise)
         .apply(this, arguments);
-    }
+    };
   }
 
   function flip(f) { return f.flip(); }
@@ -179,7 +181,7 @@
           break;
       }
       return value;
-    }
+    };
   }
 
   function or() {
@@ -192,7 +194,7 @@
           break;
       }
       return value;
-    }
+    };
   }
 
   function some(fn, sequence) {
@@ -223,7 +225,7 @@
     fn = Function.toFunction(fn);
     return function () {
       return !fn.apply(null, arguments);
-    }
+    };
   }
 
   function equal() {
@@ -240,11 +242,18 @@
           return false;
       }
       return true;
-    }
+    };
   }
 
-  lambda=function(object){return object.toFunction();}
-  invoke=function(methodName){var args=Array.slice(arguments,1);return function(object){return object[methodName].apply(object,Array.slice(arguments,1).concat(args));}}
+  function lambda(object) { return object.toFunction(); }
+
+  function invoke(methodName) { 
+    var args = Array.slice(arguments, 1);
+    return function(object) {
+      return object[methodName].apply(object, Array.slice(arguments, 1).concat(args));
+    };
+  }
+
   pluck=function(name){return function(object){return object[name];}}
   until=function(pred,fn){fn=Function.toFunction(fn);pred=Function.toFunction(pred);return function(value){while(!pred.call(null,value))
   value=fn.call(null,value);return value;}}.autoCurry();
@@ -554,7 +563,7 @@
   functional.flip = flip;
   functional.foldr = foldr.autoCurry();
   functional.and = and;
-  functional.annd = and; // alias and() for coffescript
+  functional.andd = and; // alias and() for coffescript
   functional.or = or;
   functional.orr = or; // alias or() for coffescript
   functional.some = some.autoCurry();
@@ -562,6 +571,8 @@
   functional.not = not;
   functional.nott = not; // alias not() for coffeescript
   functional.equal = equal;
+  functional.lambda = lambda;
+  functional.invoke = invoke;
 
   functional.I = I;
   functional.K = K;

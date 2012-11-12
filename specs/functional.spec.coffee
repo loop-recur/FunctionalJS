@@ -143,9 +143,9 @@ describe("functional", ->
   
   describe("and", ->
     it("returns a function that returns 'true' when all arguments applied to function's arguments return true", ->
-      expect(annd('>1', '>2')(3)).toEqual(true)
-      expect(annd('>1', '>2')(2)).toEqual(false)
-      expect(annd('>1', 'error()')(1)).toEqual(false)
+      expect(andd('>1', '>2')(3)).toEqual(true)
+      expect(andd('>1', '>2')(2)).toEqual(false)
+      expect(andd('>1', 'error()')(1)).toEqual(false)
     )
   )
 
@@ -200,4 +200,17 @@ describe("functional", ->
     )
   )
 
+  describe("lambda", ->
+    it("Returns its argument coerced to a function", ->
+      expect(lambda('+1')(2)).toEqual(3)
+      expect(lambda(addOne)(2)).toEqual(3)
+    )
+  )
+
+  describe("invoke", ->
+    obj = { addOne: addOne }
+    it("Returns a function that takes an object and applies the object's method name to the arguments", ->
+      expect(invoke('addOne')(obj, 2)).toEqual(3)
+    )
+  )
 )
