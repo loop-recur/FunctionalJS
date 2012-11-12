@@ -195,9 +195,17 @@
     }
   }
 
-  function some(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=false;for(var i=0;i<len;i++)
-  if((value=fn.call(null,sequence[i])))
-  break;return value;}
+  function some(fn, sequence) {
+    fn = Function.toFunction(fn);
+    var len = sequence.length,
+        value = false,
+        i;
+    for (i = 0; i < len; i++) {
+      if ((value = fn.call(null, sequence[i])))
+        break;
+    }
+    return value;
+  }
 
   every=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=true;for(var i=0;i<len;i++)
   if(!(value=fn.call(null,sequence[i])))
