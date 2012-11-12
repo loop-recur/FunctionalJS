@@ -149,7 +149,15 @@
   }
   select = select.autoCurry();
   
-  guard=function guard(guard,otherwise,fn){fn=Function.toFunction(fn);guard=Function.toFunction(guard||I);otherwise=Function.toFunction(otherwise||I);return function(){return(guard.apply(this,arguments)?fn:otherwise).apply(this,arguments);}}
+  function guard(guard, fn, otherwise) {
+    guard = Function.toFunction(guard || I);
+    fn = Function.toFunction(fn);
+    otherwise = Function.toFunction(otherwise || I);
+    return function () {
+      return (guard.apply(this, arguments) ? fn : otherwise)
+        .apply(this, arguments);
+    }
+  }
 
   flip = function(f){return f.flip(); }
   foldr=function(fn,init,sequence){fn=Function.toFunction(fn);var len=sequence.length,result=init;for(var i=len;--i>=0;)
@@ -381,14 +389,16 @@
     };
   }
   
+  Function.toFunction = function (value) { return value.toFunction();}
+
   // In case to-function.js isn't loaded.
   Function.toFunction = Function.toFunction || K;
   
   Function.prototype.toFunction = function () { return this; }
   
-  Function.toFunction = function (value) { return value.toFunction();}
-  
-  
+  // 
+  // String Methods
+  //
   String.prototype.lambda = function () {
     var params=[],
         expr = this,
@@ -474,8 +484,9 @@
   functional.foldl = reduce;
   functional.select = select;
   functional.filter = select;
+  functional.guard = guard;
   
-  // Add alias to "functional" namespace
+  // Add aliases to "functional" namespace
   functional.id = I;
   functional.constfn = K;
 
