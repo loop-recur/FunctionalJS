@@ -69,7 +69,6 @@
     }
     return result;
   }
-  map = map.autoCurry();
 
   function compose() {
     var fns = map(Function.toFunction, arguments),
@@ -134,7 +133,6 @@
     }
     return result;
   }
-  reduce = reduce.autoCurry();
   
   function select(fn, sequence) {
     var len = sequence.length,
@@ -147,7 +145,6 @@
     }
     return result;
   }
-  select = select.autoCurry();
   
   function guard(guard, fn, otherwise) {
     guard = Function.toFunction(guard || I);
@@ -171,17 +168,37 @@
     }
     return result;
   }
-  foldr = foldr.autoCurry();
 
-  annd=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=true;for(var i=0;i<arglen;i++)
-  if(!(value=args[i].apply(this,arguments)))
-  break;return value;}}
-  or=function(){var args=map(Function.toFunction,arguments),arglen=args.length;return function(){var value=false;for(var i=0;i<arglen;i++)
-  if((value=args[i].apply(this,arguments)))
-  break;return value;}}
-  some=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=false;for(var i=0;i<len;i++)
+  function and() {
+    var args = map(Function.toFunction, arguments),
+        arglen = args.length;
+    return function () {
+      var value = true, i;
+      for (i = 0; i < arglen; i++) {
+        if(!(value = args[i].apply(this, arguments)))
+          break;
+      }
+      return value;
+    }
+  }
+
+  function or() {
+    var args = map(Function.toFunction, arguments),
+        arglen = args.length;
+    return function () {
+      var value = false, i;
+      for(i = 0; i < arglen; i++) {
+        if((value = args[i].apply(this, arguments)))
+          break;
+      }
+      return value;
+    }
+  }
+
+  function some(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=false;for(var i=0;i<len;i++)
   if((value=fn.call(null,sequence[i])))
-  break;return value;}.autoCurry();
+  break;return value;}
+
   every=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=true;for(var i=0;i<len;i++)
   if(!(value=fn.call(null,sequence[i])))
   break;return value;}.autoCurry();
@@ -485,20 +502,26 @@
   // _attachMethodDelegates(_initialFunctionPrototypeState.getChangedMethods());
   // delete _initialFunctionPrototypeState;
 
-  // Add functions to the "functional" namespace
-  functional.map = map;
+  // Add functions to the "functional" namespace,
+  // autoCurry() functions where appropriate
+  functional.map = map.autoCurry();
   functional.compose = compose;
   functional.sequence = sequence;
   functional.compose_p = compose_p;
   functional.memoize = memoize;
-  functional.reduce = reduce;
-  functional.foldl = reduce;
-  functional.select = select;
-  functional.filter = select;
+  functional.reduce = reduce.autoCurry();
+  functional.foldl = reduce.autoCurry();
+  functional.select = select.autoCurry();
+  functional.filter = select.autoCurry();
   functional.guard = guard;
   functional.flip = flip;
-  functional.foldr = foldr;
-  
+  functional.foldr = foldr.autoCurry();
+  functional.and = and;
+  functional.annd = and; // alias and() for coffescript
+  functional.or = or;
+  functional.orr = or; // alias or() for coffescript
+  functional.some = some.autoCurry();
+
   // Add aliases to "functional" namespace
   functional.id = I;
   functional.constfn = K;

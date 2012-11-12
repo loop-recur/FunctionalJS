@@ -140,4 +140,32 @@ describe("functional", ->
       expect(foldr(sum, 0)([1, 2, 3])).toEqual(6)
     )
   )
+  
+  describe("and", ->
+    it("returns a function that returns 'true' when all arguments applied to function's arguments return true", ->
+      expect(annd('>1', '>2')(3)).toEqual(true)
+      expect(annd('>1', '>2')(2)).toEqual(false)
+      expect(annd('>1', 'error()')(1)).toEqual(false)
+    )
+  )
+
+  describe("or", ->
+    it("returns a function that returns 'true' when one of the arguments applied to the function's arguments returns true", ->
+      expect(orr('>1', '>2')(2)).toEqual(true)
+      expect(orr('>1', '>2')(0)).toEqual(false)
+      expect(orr('>1', 'error()')(2)).toEqual(true)
+    )
+  )
+
+  describe("some", ->
+    it("returns true when the function returns true for some element in the sequence", ->
+      expect(some('>2', [1, 2, 3])).toEqual(true)
+      expect(some('>10', [1, 2, 3])).toEqual(false)
+    )
+
+    it("can be partially applied", ->
+      expect(some('>2')([1, 2, 3])).toEqual(true)
+      expect(some('>10')([1, 2, 3])).toEqual(false)
+    )
+  )
 )
