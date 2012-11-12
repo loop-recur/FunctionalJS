@@ -271,7 +271,16 @@
     }
   }
 
-  zip=function(){var n=Math.min.apply(null,map('.length',arguments));var results=new Array(n);for(var i=0;i<n;i++){var key=String(i);results[key]=map(pluck(key),arguments);};return results;}
+  function zip() {
+    var n = Math.min.apply(null, map('.length',arguments)),
+        results = new Array(n),
+        key, i;
+    for (i = 0; i < n; i++) {
+      key = String(i);
+      results[key] = map(pluck(key), arguments);
+    };
+    return results;
+  }
 
 
   // Higher order methods 
@@ -590,6 +599,7 @@
   functional.pluck = pluck;
   functional.until = until.autoCurry();
   functional.untill = until.autoCurry();
+  functional.zip = zip;
 
   functional.I = I;
   functional.K = K;

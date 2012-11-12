@@ -225,4 +225,12 @@ describe("functional", ->
       expect(untill('>10', '2*')(1)).toEqual(16)
     )
   )
+
+  describe("zip", ->
+    it("Returns an array of arrays, grouping together the values at each index of multiple arrays", ->
+      expect(zip([1, 2, 3], [4, 5, 6], [7, 8, 9])).toEqual(
+        [ [1, 4, 7], [2, 5, 8], [3, 6, 9] ]
+      )
+    )
+  )
 )
