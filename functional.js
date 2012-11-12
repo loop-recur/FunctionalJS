@@ -187,8 +187,8 @@
         arglen = args.length;
     return function () {
       var value = false, i;
-      for(i = 0; i < arglen; i++) {
-        if((value = args[i].apply(this, arguments)))
+      for (i = 0; i < arglen; i++) {
+        if ((value = args[i].apply(this, arguments)))
           break;
       }
       return value;
@@ -207,9 +207,11 @@
     return value;
   }
 
-  every=function(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=true;for(var i=0;i<len;i++)
+  function every(fn,sequence){fn=Function.toFunction(fn);var len=sequence.length,value=true;for(var i=0;i<len;i++)
   if(!(value=fn.call(null,sequence[i])))
-  break;return value;}.autoCurry();
+  break;return value;}
+  every = every.autoCurry();
+
   not=function(fn){fn=Function.toFunction(fn);return function(){return!fn.apply(null,arguments);}}
   equal=function(){var arglen=arguments.length,args=map(Function.toFunction,arguments);if(!arglen)return K(true);return function(){var value=args[0].apply(this,arguments);for(var i=1;i<arglen;i++)
   if(value!=args[i].apply(this,args))
@@ -529,6 +531,7 @@
   functional.or = or;
   functional.orr = or; // alias or() for coffescript
   functional.some = some.autoCurry();
+  functional.every = every.autoCurry();
 
   // Add aliases to "functional" namespace
   functional.id = I;

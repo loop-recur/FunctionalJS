@@ -158,14 +158,28 @@ describe("functional", ->
   )
 
   describe("some", ->
+    xs = [1, 2, 3]
     it("returns true when the function returns true for some element in the sequence", ->
-      expect(some('>2', [1, 2, 3])).toEqual(true)
-      expect(some('>10', [1, 2, 3])).toEqual(false)
+      expect(some('>2', xs)).toEqual(true)
+      expect(some('>10', xs)).toEqual(false)
     )
 
     it("can be partially applied", ->
-      expect(some('>2')([1, 2, 3])).toEqual(true)
-      expect(some('>10')([1, 2, 3])).toEqual(false)
+      expect(some('>2')(xs)).toEqual(true)
+      expect(some('>10')(xs)).toEqual(false)
+    )
+  )
+
+  describe("every", ->
+    xs = [1, 2, 3]
+    it("returns true when the function returns true for every element in the sequence", ->
+      expect(every('<2', xs)).toEqual(false)
+      expect(every('<10', xs)).toEqual(true)
+    )
+
+    it("can be partially applied", ->
+      expect(every('<2')(xs)).toEqual(false)
+      expect(every('<10')(xs)).toEqual(true)
     )
   )
 )
