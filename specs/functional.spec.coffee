@@ -213,4 +213,10 @@ describe("functional", ->
       expect(invoke('addOne')(obj, 2)).toEqual(3)
     )
   )
+  
+  describe("pluck", ->
+    it("Returns a function that takes an object and returns the value of its 'name' property", ->
+      expect(pluck('age')({ age: 23 })).toEqual(23)
+    )
+  )
 )
