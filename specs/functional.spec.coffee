@@ -189,4 +189,15 @@ describe("functional", ->
       expect(nott('<2')(1)).toEqual(false)
     )
   )
+
+  describe("equal", ->
+    it("Returns a function that returns true when this function's arguments applied to that function's are always the same", ->
+      expect(equal()()).toEqual(true)
+      expect(equal(K(1))()).toEqual(true)
+      expect(equal(K(1), K(1))()).toEqual(true)
+      expect(equal(K(1), K(2))()).toEqual(false)
+      expect(equal(K(1), K(2), 'error()')()).toEqual(false)
+    )
+  )
+
 )

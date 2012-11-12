@@ -226,9 +226,23 @@
     }
   }
 
-  equal=function(){var arglen=arguments.length,args=map(Function.toFunction,arguments);if(!arglen)return K(true);return function(){var value=args[0].apply(this,arguments);for(var i=1;i<arglen;i++)
-  if(value!=args[i].apply(this,args))
-  return false;return true;}}
+  function equal() {
+    var arglen = arguments.length,
+        args = map(Function.toFunction, arguments);
+    if (!arglen) {
+      return K(true);
+    }
+    return function () {
+      var value = args[0].apply(this, arguments),
+          i;
+      for (i = 1; i < arglen; i++){
+        if (value != args[i].apply(this, args))
+          return false;
+      }
+      return true;
+    }
+  }
+
   lambda=function(object){return object.toFunction();}
   invoke=function(methodName){var args=Array.slice(arguments,1);return function(object){return object[methodName].apply(object,Array.slice(arguments,1).concat(args));}}
   pluck=function(name){return function(object){return object[name];}}
@@ -547,6 +561,10 @@
   functional.every = every.autoCurry();
   functional.not = not;
   functional.nott = not; // alias not() for coffeescript
+  functional.equal = equal;
+
+  functional.I = I;
+  functional.K = K;
 
   // Add aliases to "functional" namespace
   functional.id = I;
