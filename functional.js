@@ -242,9 +242,11 @@
     };
   }
 
-  function pluck(name) {
-    return function(object) { return object[name]; }
+  function pluck(name, obj) {
+    return obj[name];
   }
+  // TODO: merge this with function defintion when refactoring
+  pluck = pluck.autoCurry();
   
   function until(pred, fn) {
     fn = Function.toFunction(fn);
@@ -581,7 +583,7 @@
   functional.equal = equal;
   functional.lambda = lambda;
   functional.invoke = invoke;
-  functional.pluck = pluck;
+  functional.pluck = pluck.autoCurry();
   functional.until = until.autoCurry();
   functional.untill = until.autoCurry();
   functional.zip = zip;
