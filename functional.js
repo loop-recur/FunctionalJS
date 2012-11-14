@@ -17,28 +17,28 @@
       }
   
     , curry = function (fn /* variadic number of args */) {
-         var args = slice.call(arguments, 1);
-         return function () {
-             return fn.apply(this, args.concat(toArray(arguments)));
-         };
+        var args = slice.call(arguments, 1);
+        return function () {
+          return fn.apply(this, args.concat(toArray(arguments)));
+        };
       }
 
     , autoCurry = function (fn, numArgs) {
-         numArgs = numArgs || fn.length;
-         var f = function () {
-             if (arguments.length < numArgs) {
-                 return numArgs - arguments.length > 0 ?
-                     autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
-                                  numArgs - arguments.length) :
-                     curry.apply(this, [fn].concat(toArray(arguments)));
-             }
-             else {
-                 return fn.apply(this, arguments);
-             }
-         };
-         f.toString = function(){ return fn.toString(); };
-         f.curried = true;
-         return f;
+        numArgs = numArgs || fn.length;
+        var f = function () {
+          if (arguments.length < numArgs) {
+            return numArgs - arguments.length > 0 ?
+              autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
+                numArgs - arguments.length) :
+              curry.apply(this, [fn].concat(toArray(arguments)));
+          }
+          else {
+            return fn.apply(this, arguments);
+          }
+        };
+        f.toString = function(){ return fn.toString(); };
+        f.curried = true;
+        return f;
       }
 
       // Add autoCurry() to the Function prototype. The autoCurry() 
