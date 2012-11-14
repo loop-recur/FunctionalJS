@@ -50,220 +50,231 @@
           return autoCurry(this, n);
         };
         return Function.prototype.autoCurry ? true : false
-      })();
+      })()
 
-  function map(fn, sequence) {
-    var length = sequence.length,
-        result = new Array(length),
-        i;
-    fn = Function.toFunction(fn);
-    for (i = 0; i < length; i++) {
-      result[i] = fn.apply(null, [sequence[i], i]);
-    }
-    return result;
-  }
+    , map = function (fn, sequence) {
+        var length = sequence.length,
+            result = new Array(length),
+            i;
+        fn = Function.toFunction(fn);
+        for (i = 0; i < length; i++) {
+          result[i] = fn.apply(null, [sequence[i], i]);
+        }
+        return result;
+      }.autoCurry()
 
-  function compose() {
-    var fns = map(Function.toFunction, arguments),
-        arglen = fns.length;
-    return function () {
-      var i;
-      for (i = arglen; --i>=0;) {
-        arguments = [fns[i].apply(this, arguments)];
+    , compose = function () {
+        var fns = map(Function.toFunction, arguments),
+            arglen = fns.length;
+        return function () {
+          var i;
+          for (i = arglen; --i>=0;) {
+            arguments = [fns[i].apply(this, arguments)];
+          }
+          return arguments[0];
+        };
       }
-      return arguments[0];
-    };
-  }
 
-  function sequence() {
-    var fns = map(Function.toFunction, arguments),
-        arglen = fns.length;
-    return function () {
-      var i;
-      for (i = 0; i < arglen; i++) {
-        arguments = [fns[i].apply(this, arguments)];
+    , sequence = function () {
+        var fns = map(Function.toFunction, arguments),
+            arglen = fns.length;
+        return function () {
+          var i;
+          for (i = 0; i < arglen; i++) {
+            arguments = [fns[i].apply(this, arguments)];
+          }
+          return arguments[0];
+        };
       }
-      return arguments[0];
-    };
-  }
 
-  function memoize(fn) {  
-    return function () {  
-        var args = Array.prototype.slice.call(arguments),  
-            hash = "",  
-            i = args.length;  
-        currentArg = null;  
-        while (i--) {  
-            currentArg = args[i];  
-            hash += (currentArg === Object(currentArg)) ?  
-            JSON.stringify(currentArg) : currentArg;  
-            fn.memoize || (fn.memoize = {});  
-        }  
-        return (hash in fn.memoize) ? fn.memoize[hash] :  
-        fn.memoize[hash] = fn.apply(this, args);  
-    };  
-  }
+    , memoize = function (fn) {  
+        return function () {  
+            var args = Array.prototype.slice.call(arguments),  
+                hash = "",  
+                i = args.length;  
+            currentArg = null;  
+            while (i--) {  
+                currentArg = args[i];  
+                hash += (currentArg === Object(currentArg)) ?  
+                JSON.stringify(currentArg) : currentArg;  
+                fn.memoize || (fn.memoize = {});  
+            }  
+            return (hash in fn.memoize) ? fn.memoize[hash] :  
+            fn.memoize[hash] = fn.apply(this, args);  
+        };  
+      }
 
-  function reduce(fn,init,sequence) {
-    var len = sequence.length,
-        result = init,
-        i;
-    fn = Function.toFunction(fn);
-    for(i = 0; i < len; i++) {
-      result = fn.apply(null, [result, sequence[i]]);
-    }
-    return result;
-  }
+    , reduce = function (fn,init,sequence) {
+        var len = sequence.length,
+            result = init,
+            i;
+        fn = Function.toFunction(fn);
+        for(i = 0; i < len; i++) {
+          result = fn.apply(null, [result, sequence[i]]);
+        }
+        return result;
+      }.autoCurry()
+
+    , select = function (fn, sequence) {
+        var len = sequence.length,
+            result = [],
+            i, x;
+        fn = Function.toFunction(fn);
+        for(i = 0; i < len; i++) {
+          x = sequence[i];
+          fn.apply(null, [x, i]) && result.push(x);
+        }
+        return result;
+      }.autoCurry()
+
+    , guard = function (guard, fn, otherwise) {
+        guard = Function.toFunction(guard || I);
+        fn = Function.toFunction(fn);
+        otherwise = Function.toFunction(otherwise || I);
+        return function () {
+          return (guard.apply(this, arguments) ? fn : otherwise)
+            .apply(this, arguments);
+        };
+      }.autoCurry()
+
+    , flip = function (f) { return f.flip(); }
+
+    , foldr = function (fn, init, sequence) {
+        var len = sequence.length,
+            result = init,
+            i;
+        fn = Function.toFunction(fn);
+        for(i = len; --i >= 0;) {
+          result = fn.apply(null, [sequence[i],result]);
+        }
+        return result;
+      }.autoCurry()
+
+    , and = function () {
+        var args = map(Function.toFunction, arguments),
+            arglen = args.length;
+        return function () {
+          var value = true, i;
+          for (i = 0; i < arglen; i++) {
+            if(!(value = args[i].apply(this, arguments)))
+              break;
+          }
+          return value;
+        };
+      }
+
+    , or = function () {
+        var args = map(Function.toFunction, arguments),
+            arglen = args.length;
+        return function () {
+          var value = false, i;
+          for (i = 0; i < arglen; i++) {
+            if ((value = args[i].apply(this, arguments)))
+              break;
+          }
+          return value;
+        };
+      }
+
+    , some = function (fn, sequence) {
+        fn = Function.toFunction(fn);
+        var len = sequence.length,
+            value = false,
+            i;
+        for (i = 0; i < len; i++) {
+          if ((value = fn.call(null, sequence[i])))
+            break;
+        }
+        return value;
+      }.autoCurry()
+
+    , every = function (fn, sequence) {
+        fn = Function.toFunction(fn);
+        var len = sequence.length,
+            value = true,
+            i;
+        for (i = 0; i < len; i++) {
+          if (!(value = fn.call(null, sequence[i])))
+            break;
+        }
+        return value;
+      }.autoCurry()
+
+    , not = function (fn) {
+        fn = Function.toFunction(fn);
+        return function () {
+          return !fn.apply(null, arguments);
+        };
+      }
+
+    , equal = function () {
+        var arglen = arguments.length,
+            args = map(Function.toFunction, arguments);
+        if (!arglen) {
+          return K(true);
+        }
+        return function () {
+          var value = args[0].apply(this, arguments),
+              i;
+          for (i = 1; i < arglen; i++){
+            if (value != args[i].apply(this, args))
+              return false;
+          }
+          return true;
+        };
+      }
+
+    , lambda = function (object) { 
+        return object.toFunction(); 
+      }
+
+    , invoke = function (methodName) { 
+        var args = slice.call(arguments, 1);
+        return function(object) {
+          return object[methodName].apply(object, slice.call(arguments, 1).concat(args));
+        };
+      }
+
+    , pluck = function (name, obj) {
+        return obj[name];
+      }.autoCurry()
+
+    , until = function (pred, fn) {
+        fn = Function.toFunction(fn);
+        pred = Function.toFunction(pred);
+        return function (value) {
+          while (!pred.call(null, value)) {
+            value = fn.call(null, value);
+          }
+          return value;
+        }
+      }.autoCurry()
+
+    , zip = function () {
+        var n = Math.min.apply(null, map('.length',arguments)),
+            results = new Array(n),
+            key, i;
+        for (i = 0; i < n; i++) {
+          key = String(i);
+          results[key] = map(pluck(key), arguments);
+        };
+        return results;
+      }
+
+      // Combinators
+    , I = function (x) { return x }
+
+    , K = function (x) { return function () { return x } }
+      
+    , S = function (f, g) {
+        var toFunction = Function.toFunction;
+        f = toFunction(f);
+        g = toFunction(g);
+        return function () { 
+          return f.apply(this, [g.apply(this, arguments)].concat(slice.call(arguments,0)));
+        };
+      };
   
-  function select(fn, sequence) {
-    var len = sequence.length,
-        result = [],
-        i, x;
-    fn = Function.toFunction(fn);
-    for(i = 0; i < len; i++) {
-      x = sequence[i];
-      fn.apply(null, [x, i]) && result.push(x);
-    }
-    return result;
-  }
-  
-  function guard(guard, fn, otherwise) {
-    guard = Function.toFunction(guard || I);
-    fn = Function.toFunction(fn);
-    otherwise = Function.toFunction(otherwise || I);
-    return function () {
-      return (guard.apply(this, arguments) ? fn : otherwise)
-        .apply(this, arguments);
-    };
-  }
-
-  function flip(f) { return f.flip(); }
-
-  function foldr(fn, init, sequence) {
-    var len = sequence.length,
-        result = init,
-        i;
-    fn = Function.toFunction(fn);
-    for(i = len; --i >= 0;) {
-      result = fn.apply(null, [sequence[i],result]);
-    }
-    return result;
-  }
-
-  function and() {
-    var args = map(Function.toFunction, arguments),
-        arglen = args.length;
-    return function () {
-      var value = true, i;
-      for (i = 0; i < arglen; i++) {
-        if(!(value = args[i].apply(this, arguments)))
-          break;
-      }
-      return value;
-    };
-  }
-
-  function or() {
-    var args = map(Function.toFunction, arguments),
-        arglen = args.length;
-    return function () {
-      var value = false, i;
-      for (i = 0; i < arglen; i++) {
-        if ((value = args[i].apply(this, arguments)))
-          break;
-      }
-      return value;
-    };
-  }
-
-  function some(fn, sequence) {
-    fn = Function.toFunction(fn);
-    var len = sequence.length,
-        value = false,
-        i;
-    for (i = 0; i < len; i++) {
-      if ((value = fn.call(null, sequence[i])))
-        break;
-    }
-    return value;
-  }
-
-  function every(fn, sequence) {
-    fn = Function.toFunction(fn);
-    var len = sequence.length,
-        value = true,
-        i;
-    for (i = 0; i < len; i++) {
-      if (!(value = fn.call(null, sequence[i])))
-        break;
-    }
-    return value;
-  }
-
-  function not(fn) {
-    fn = Function.toFunction(fn);
-    return function () {
-      return !fn.apply(null, arguments);
-    };
-  }
-
-  function equal() {
-    var arglen = arguments.length,
-        args = map(Function.toFunction, arguments);
-    if (!arglen) {
-      return K(true);
-    }
-    return function () {
-      var value = args[0].apply(this, arguments),
-          i;
-      for (i = 1; i < arglen; i++){
-        if (value != args[i].apply(this, args))
-          return false;
-      }
-      return true;
-    };
-  }
-
-  function lambda(object) { 
-    return object.toFunction(); 
-  }
-
-  function invoke(methodName) { 
-    var args = slice.call(arguments, 1);
-    return function(object) {
-      return object[methodName].apply(object, slice.call(arguments, 1).concat(args));
-    };
-  }
-
-  function pluck(name, obj) {
-    return obj[name];
-  }
-  // TODO: merge this with function defintion when refactoring
-  pluck = pluck.autoCurry();
-  
-  function until(pred, fn) {
-    fn = Function.toFunction(fn);
-    pred = Function.toFunction(pred);
-    return function (value) {
-      while (!pred.call(null, value)) {
-        value = fn.call(null, value);
-      }
-      return value;
-    }
-  }
-
-  function zip() {
-    var n = Math.min.apply(null, map('.length',arguments)),
-        results = new Array(n),
-        key, i;
-    for (i = 0; i < n; i++) {
-      key = String(i);
-      results[key] = map(pluck(key), arguments);
-    };
-    return results;
-  }
-
-
   // Higher order methods 
   // Begin tracking changes to the Function.Prototype
   _initialFunctionPrototypeState = _startRecordingMethodChanges(Function.prototype);
@@ -358,20 +369,6 @@
   // Alias Function.prototype.partial, for ease of use
   Function.prototype.p = Function.prototype.partial;
 
-  // Combinators
-  function I(x) { return x }
-
-  function K(x) { return function () { return x } }
-  
-  function S(f, g) {
-    var toFunction = Function.toFunction;
-    f = toFunction(f);
-    g = toFunction(g);
-    return function () { 
-      return f.apply(this, [g.apply(this, arguments)].concat(slice.call(arguments,0)));
-    };
-  }
-  
   // Combinator Methods
   Function.prototype.flip = function () {
     var fn = this;
@@ -546,32 +543,31 @@
   // delete _initialFunctionPrototypeState;
 
   // Add functions to the "functional" namespace,
-  // autoCurry() functions where appropriate
-  functional.map = map.autoCurry();
+  functional.map = map;
   functional.compose = compose;
   functional.sequence = sequence;
   functional.memoize = memoize;
-  functional.reduce = reduce.autoCurry();
-  functional.foldl = reduce.autoCurry();
-  functional.select = select.autoCurry();
-  functional.filter = select.autoCurry();
+  functional.reduce = reduce;
+  functional.foldl = reduce;
+  functional.select = select;
+  functional.filter = select;
   functional.guard = guard;
   functional.flip = flip;
-  functional.foldr = foldr.autoCurry();
+  functional.foldr = foldr;
   functional.and = and;
   functional.andd = and; // alias and() for coffescript
   functional.or = or;
   functional.orr = or; // alias or() for coffescript
-  functional.some = some.autoCurry();
-  functional.every = every.autoCurry();
+  functional.some = some;
+  functional.every = every;
   functional.not = not;
   functional.nott = not; // alias not() for coffeescript
   functional.equal = equal;
   functional.lambda = lambda;
   functional.invoke = invoke;
-  functional.pluck = pluck.autoCurry();
-  functional.until = until.autoCurry();
-  functional.untill = until.autoCurry();
+  functional.pluck = pluck;
+  functional.until = until
+  functional.untill = until; // alias until() for coffeescript
   functional.zip = zip;
   functional.I = I;
   functional.id = I;
