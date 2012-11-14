@@ -12,18 +12,6 @@
       // create local reference for faster look-up
     , slice = Array.prototype.slice;
 
-  // Add slice() method to JavaScript's built-in Array object, if it
-  // doesn't already exist.
-  /*
-  if (!Array.slice) { 
-    Array.slice = (function (slice) {
-      return function (object) {
-        return slice.apply(object, slice.call(arguments, 1));
-      };
-    })(Array.prototype.slice);
-  }
-  */
-
   // Add autoCurry() to the Function prototype. The autoCurry() 
   // method is a Function decorator that returns a duplicate of 
   // the function, but which can now be partially applied.
