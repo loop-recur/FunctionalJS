@@ -7,10 +7,14 @@
 
       // Detect free variables "exports" and "global"
     , freeExports = typeof exports == 'object' && exports
-    , freeGlobal = typeof global == 'object' && global;
+    , freeGlobal = typeof global == 'object' && global
+
+      // create local reference for faster look-up
+    , slice = Array.prototype.slice;
 
   // Add slice() method to JavaScript's built-in Array object, if it
   // doesn't already exist.
+  /*
   if (!Array.slice) { 
     Array.slice = (function (slice) {
       return function (object) {
@@ -18,6 +22,7 @@
       };
     })(Array.prototype.slice);
   }
+  */
 
   // Add autoCurry() to the Function prototype. The autoCurry() 
   // method is a Function decorator that returns a duplicate of 
@@ -236,9 +241,9 @@
   }
 
   function invoke(methodName) { 
-    var args = Array.slice(arguments, 1);
+    var args = slice.call(arguments, 1);
     return function(object) {
-      return object[methodName].apply(object, Array.slice(arguments, 1).concat(args));
+      return object[methodName].apply(object, slice.call(arguments, 1).concat(args));
     };
   }
 
@@ -277,38 +282,35 @@
   
   Function.prototype.bind = function (object) {
     var fn = this,
-        slice = Array.slice,
-        args = slice(arguments, 1);
+        args = slice.call(arguments, 1);
     return function () {
-      return fn.apply(object, args.concat(slice(arguments, 0)));
+      return fn.apply(object, args.concat(slice.call(arguments, 0)));
     };
   }
 
   Function.prototype.saturate = function () {
     var fn = this,
-        args = Array.slice(arguments, 0);
+        args = slice.call(arguments, 0);
     return function () { return fn.apply(this, args); };
   }
 
   Function.prototype.aritize = function (n) {
     var fn = this;
     return function () {
-      return fn.apply(this, Array.slice(arguments, 0, n));
+      return fn.apply(this, slice.call(arguments, 0, n));
     };
   }
 
   Function.prototype.curry = function () {
     var fn = this,
-        slice = Array.slice,
-        args = slice(arguments, 0);
+        args = slice.call(arguments, 0);
     return function () {
-      return fn.apply(this, args.concat(slice(arguments, 0)));
+      return fn.apply(this, args.concat(slice.call(arguments, 0)));
     };
   }
 
   Function.prototype.rcurry = function () {
     var fn = this,
-        slice = Array.slice,
         args = slice(arguments, 0);
     return function () {
       return fn.apply(this, slice(arguments, 0).concat(args));
@@ -317,10 +319,9 @@
 
   Function.prototype.ncurry = function (n) {
     var fn = this,
-        slice = Array.slice,
-        largs = slice(arguments, 1);
+        largs = slice.call(arguments, 1);
     return function () {
-      var args = largs.concat(slice(arguments, 0));
+      var args = largs.concat(slice.call(arguments, 0));
       if (args.length<n) {
         args.unshift(n);
         return fn.ncurry.apply(fn, args);
@@ -331,10 +332,9 @@
 
   Function.prototype.rncurry = function (n) {
     var fn = this,
-        slice = Array.slice,
-        rargs = slice(arguments, 1);
+        rargs = slice.call(arguments, 1);
     return function () {
-      var args = slice(arguments, 0).concat(rargs);
+      var args = slice.call(arguments, 0).concat(rargs);
       if (args.length < n) {
         args.unshift(n);
         return fn.rncurry.apply(fn, args);
@@ -346,15 +346,14 @@
   Function.prototype.partial = function () {
     var fn = this,
         _ = Function._,
-        slice = Array.slice,
-        args = slice(arguments,0),
+        args = slice.call(arguments,0),
         subpos=[],
         i, value;
     for(i = 0; i < arguments.length; i++) {
       arguments[i] == _ && subpos.push(i);
     }
     return function () {
-      var specialized = args.concat(slice(arguments, subpos.length)),
+      var specialized = args.concat(slice.call(arguments, subpos.length)),
           i;
       for (i = 0; i < Math.min(subpos.length, arguments.length); i++) {
         specialized[subpos[i]] = arguments[i];
@@ -381,7 +380,7 @@
     f = toFunction(f);
     g = toFunction(g);
     return function () { 
-      return f.apply(this, [g.apply(this, arguments)].concat(Array.slice(arguments,0)));
+      return f.apply(this, [g.apply(this, arguments)].concat(slice.call(arguments,0)));
     };
   }
   
@@ -389,7 +388,7 @@
   Function.prototype.flip = function () {
     var fn = this;
     return function () {
-      var args = Array.slice(arguments, 0);
+      var args = slice.call(arguments, 0);
       args = args.slice(1, 2).concat(args.slice(0, 1)).concat(args.slice(2));
       return fn.apply(this,args);
     };
@@ -398,9 +397,8 @@
   Function.prototype.uncurry = function () {
     var fn = this;
     return function () {
-      var slice = Array.slice,
-          f1 = fn.apply(this, slice(arguments, 0, 1));
-      return f1.apply(this, slice(arguments, 1));
+      var f1 = fn.apply(this, slice.call(arguments, 0, 1));
+      return f1.apply(this, slice.call(arguments, 1));
     };
   }
   
@@ -417,7 +415,7 @@
     var fn = this;
     filter = Function.toFunction(filter);
     return function () {
-      var args = Array.slice(arguments, 0);
+      var args = slice.call(arguments, 0);
       args[index] = filter.call(this, args[index]);
       return fn.apply(this, args);
     };
@@ -428,7 +426,7 @@
     filter = Function.toFunction(filter);
     start = start || 0;
     return function () {
-      var args = Array.slice(arguments, 0),
+      var args = slice.call(arguments, 0),
           e = end < 0 ? args.length + end : end || args.length;
       args.splice.apply(args, [start, (e || args.length) - start].concat(filter.apply(this, args.slice(start, e))));
       return fn.apply(this,args);
@@ -550,7 +548,7 @@
       functional[name] = functional[name] || (function (name) {
         var fn = methods[name];
         return function (object) { 
-          return fn.apply(Function.toFunction(object), Array.slice(arguments,1));
+          return fn.apply(Function.toFunction(object), slice.call(arguments,1));
         }
       })(name);
     }
