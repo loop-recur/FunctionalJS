@@ -10,47 +10,47 @@
     , freeGlobal = typeof global == 'object' && global
 
       // create local reference for faster look-up
-    , slice = Array.prototype.slice;
+    , slice = Array.prototype.slice
 
-  // Add autoCurry() to the Function prototype. The autoCurry() 
-  // method is a Function decorator that returns a duplicate of 
-  // the function, but which can now be partially applied.
-  // curry/autoCurry is from wu.js <http://fitzgen.github.com/wu.js/>
-  (function() {
-    var toArray = function(x) {
-      return Array.prototype.slice.call(x);
-    }
-    
-    var curry = function (fn /* variadic number of args */) {
-           var args = Array.prototype.slice.call(arguments, 1);
-           var f = function () {
-               return fn.apply(this, args.concat(toArray(arguments)));
-           };
-           return f;
-       };
+    , toArray = function (x) {
+        return slice.call(x);
+      }
+  
+    , curry = function (fn /* variadic number of args */) {
+         var args = slice.call(arguments, 1);
+         return function () {
+             return fn.apply(this, args.concat(toArray(arguments)));
+         };
+      }
 
-    var autoCurry = function (fn, numArgs) {
-           numArgs = numArgs || fn.length;
-           var f = function () {
-               if (arguments.length < numArgs) {
-                   return numArgs - arguments.length > 0 ?
-                       autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
-                                    numArgs - arguments.length) :
-                       curry.apply(this, [fn].concat(toArray(arguments)));
-               }
-               else {
-                   return fn.apply(this, arguments);
-               }
-           };
-           f.toString = function(){ return fn.toString(); };
-           f.curried = true;
-           return f;
-       };
-       
-       Function.prototype.autoCurry = function(n) {
-         return autoCurry(this, n);
-       }
-  })();
+    , autoCurry = function (fn, numArgs) {
+         numArgs = numArgs || fn.length;
+         var f = function () {
+             if (arguments.length < numArgs) {
+                 return numArgs - arguments.length > 0 ?
+                     autoCurry(curry.apply(this, [fn].concat(toArray(arguments))),
+                                  numArgs - arguments.length) :
+                     curry.apply(this, [fn].concat(toArray(arguments)));
+             }
+             else {
+                 return fn.apply(this, arguments);
+             }
+         };
+         f.toString = function(){ return fn.toString(); };
+         f.curried = true;
+         return f;
+      }
+
+      // Add autoCurry() to the Function prototype. The autoCurry() 
+      // method is a Function decorator that returns a duplicate of 
+      // the function, but which can now be partially applied.
+      // curry/autoCurry is from wu.js <http://fitzgen.github.com/wu.js/>
+    , isDecoratedWithAutoCurry = (function () {
+        Function.prototype.autoCurry = function (n) {
+          return autoCurry(this, n);
+        };
+        return Function.prototype.autoCurry ? true : false
+      })();
 
   function map(fn, sequence) {
     var length = sequence.length,
