@@ -1,13 +1,13 @@
 ;(function (window, undefined) {
 
-  // Detect free variables "exports" and "global", and create 
-  // "functional" namespace
-  var freeExports = typeof exports == 'object' && exports,
-      freeGlobal = typeof global == 'object' && global,
-      _ = Function._ = {},
-      _initialFunctionPrototypeState,
-      functional = {},
-      oldFunctional = {};
+  var functional = {} // create "functional" namespace
+    , oldFunctional = {}
+    , _ = Function._ = {}
+    , _initialFunctionPrototypeState
+
+      // Detect free variables "exports" and "global"
+    , freeExports = typeof exports == 'object' && exports
+    , freeGlobal = typeof global == 'object' && global;
 
   // Add slice() method to JavaScript's built-in Array object, if it
   // doesn't already exist.
