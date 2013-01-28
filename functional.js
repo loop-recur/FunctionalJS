@@ -5,17 +5,22 @@
     , _ = Function._ = {}
     , _initialFunctionPrototypeState
 
-      // Detect free variables "exports" and "global"
+  //+ freeExports :: Bool
     , freeExports = typeof exports == 'object' && exports
+
+  //+ freeGlobal :: Bool
     , freeGlobal = typeof global == 'object' && global
 
-      // create local reference for faster look-up
+  //- slice :: create local reference for faster look-up
     , slice = Array.prototype.slice
 
+  //+ toArray :: a -> [b]
     , toArray = function (x) {
         return slice.call(x);
       }
   
+  //- from wu.js <http://fitzgen.github.com/wu.js/>
+  //+ curry :: f -> ? -> g
     , curry = function (fn /* variadic number of args */) {
         var args = slice.call(arguments, 1);
         return function () {
@@ -23,6 +28,8 @@
         };
       }
 
+  //- from wu.js <http://fitzgen.github.com/wu.js/>
+  //+ autoCurry :: f -> Int -> g
     , autoCurry = function (fn, numArgs) {
         numArgs = numArgs || fn.length;
         var f = function () {
@@ -41,17 +48,14 @@
         return f;
       }
 
-      // Add autoCurry() to the Function prototype. The autoCurry() 
-      // method is a Function decorator that returns a duplicate of 
-      // the function, but which can now be partially applied.
-      // curry/autoCurry is from wu.js <http://fitzgen.github.com/wu.js/>
-    , isDecoratedWithAutoCurry = (function () {
+  //+ decorateFunctionPrototypeWithAutoCurry :: IO
+    , decorateFunctionPrototypeWithAutoCurry = (function () {
         Function.prototype.autoCurry = function (n) {
           return autoCurry(this, n);
         };
-        return Function.prototype.autoCurry ? true : false
       })()
 
+  //+ map :: f -> [a] -> [b]
     , map = function (fn, sequence) {
         var length = sequence.length,
             result = new Array(length),
@@ -63,6 +67,7 @@
         return result;
       }.autoCurry()
 
+  //+ compose :: f -> g -> h 
     , compose = function () {
         var fns = map(Function.toFunction, arguments),
             arglen = fns.length;
@@ -75,6 +80,7 @@
         };
       }
 
+  //+ sequence :: f -> g -> h
     , sequence = function () {
         var fns = map(Function.toFunction, arguments),
             arglen = fns.length;
@@ -87,6 +93,7 @@
         };
       }
 
+  //+ memoize :: f -> g
     , memoize = function (fn) {  
         return function () {  
             var args = Array.prototype.slice.call(arguments),  
@@ -104,6 +111,7 @@
         };  
       }
 
+  //+ reduce :: f -> a -> [a] -> a
     , reduce = function (fn,init,sequence) {
         var len = sequence.length,
             result = init,
@@ -115,6 +123,7 @@
         return result;
       }.autoCurry()
 
+  //+ select :: f -> [a] -> [a]
     , select = function (fn, sequence) {
         var len = sequence.length,
             result = [],
@@ -127,6 +136,7 @@
         return result;
       }.autoCurry()
 
+  //+ guard :: (_ -> Bool) -> f -> g -> h
     , guard = function (guard, fn, otherwise) {
         guard = Function.toFunction(guard || I);
         fn = Function.toFunction(fn);
@@ -137,8 +147,10 @@
         };
       }.autoCurry()
 
+  //+ flip :: f -> g 
     , flip = function (f) { return f.flip(); }
 
+  //+ foldr :: f -> a -> [a] -> a
     , foldr = function (fn, init, sequence) {
         var len = sequence.length,
             result = init,
@@ -150,6 +162,7 @@
         return result;
       }.autoCurry()
 
+  //+ and :: _ -> (_ -> Bool)
     , and = function () {
         var args = map(Function.toFunction, arguments),
             arglen = args.length;
@@ -163,6 +176,7 @@
         };
       }
 
+  //+ or :: _ -> (_ -> Bool)
     , or = function () {
         var args = map(Function.toFunction, arguments),
             arglen = args.length;
@@ -176,6 +190,7 @@
         };
       }
 
+  //+ some :: f -> [a] -> Bool
     , some = function (fn, sequence) {
         fn = Function.toFunction(fn);
         var len = sequence.length,
@@ -188,6 +203,7 @@
         return value;
       }.autoCurry()
 
+  //+ every :: f -> [a] -> Bool
     , every = function (fn, sequence) {
         fn = Function.toFunction(fn);
         var len = sequence.length,
@@ -200,6 +216,7 @@
         return value;
       }.autoCurry()
 
+  //+ not :: f -> (_ -> Bool)
     , not = function (fn) {
         fn = Function.toFunction(fn);
         return function () {
@@ -207,6 +224,7 @@
         };
       }
 
+  //+ equal :: _ -> (_ -> Bool)
     , equal = function () {
         var arglen = arguments.length,
             args = map(Function.toFunction, arguments);
@@ -224,10 +242,12 @@
         };
       }
 
+  //+ lamda :: a -> f
     , lambda = function (object) { 
         return object.toFunction(); 
       }
 
+  //+ invoke :: String -> (a -> b)
     , invoke = function (methodName) { 
         var args = slice.call(arguments, 1);
         return function(object) {
@@ -235,10 +255,12 @@
         };
       }
 
+  //+ pluck :: String -> a -> b
     , pluck = function (name, obj) {
         return obj[name];
       }.autoCurry()
 
+  //+ until :: a -> f -> (b -> c)
     , until = function (pred, fn) {
         fn = Function.toFunction(fn);
         pred = Function.toFunction(pred);
@@ -250,6 +272,7 @@
         }
       }.autoCurry()
 
+  //+ zip :: (List ...) => [a] -> [b] -> ... -> [[a, b, ...]]
     , zip = function () {
         var n = Math.min.apply(null, map('.length',arguments)),
             results = new Array(n),
