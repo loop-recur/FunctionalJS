@@ -298,7 +298,7 @@
   //+ K :: a -> (_ -> a)
     , K = function(x) { return function () { return x } }
       
-  //+ S ::
+  //+ S :: f -> g -> (_ -> b)
     , S = function(f, g) {
         var toFunction = Function.toFunction;
         f = toFunction(f);
