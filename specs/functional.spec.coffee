@@ -190,9 +190,9 @@ describe "functional.js", ->
     expect(K(1)(2)).toEqual(1)
     expect(K('sweet')('foo')).toEqual('sweet')
 
-  it "has an alias of 'constfn'", ->
-    expect(constfn(1)(2)).toEqual(1)
-    expect(constfn('sweet')('foo')).toEqual('sweet')
+  it "has an alias of 'konst'", ->
+    expect(konst(1)(2)).toEqual(1)
+    expect(konst('sweet')('foo')).toEqual('sweet')
 
  describe "S", ->
   it "Returns the composition of two functions, applying the first function to the result of the second, AND the original arguments", ->

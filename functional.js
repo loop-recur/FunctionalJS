@@ -595,7 +595,7 @@
   functional.I = I;
   functional.id = I;
   functional.K = K;
-  functional.constfn = K;
+  functional.konst = K;
   functional.S = S;
 
   // Detect free variable "global" and use it as "window"
