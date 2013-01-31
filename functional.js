@@ -148,7 +148,15 @@
       }.autoCurry()
 
   //+ flip :: f -> g 
-    , flip = function (f) { return f.flip(); }
+    , flip = function(f) {
+        return function () {
+          var args = slice.call(arguments, 0);
+          args = args.slice(1, 2)
+                .concat(args.slice(0, 1))
+                .concat(args.slice(2));
+          return f.apply(null, args);
+        };
+      }
 
   //+ foldr :: f -> a -> [a] -> a
     , foldr = function (fn, init, sequence) {
@@ -273,7 +281,7 @@
       }.autoCurry()
 
   //+ zip :: (List ...) => [a] -> [b] -> ... -> [[a, b, ...]]
-    , zip = function () {
+    , zip = function() {
         var n = Math.min.apply(null, map('.length',arguments)),
             results = new Array(n),
             key, i;
@@ -284,219 +292,103 @@
         return results;
       }
 
-      // Combinators
-    , I = function (x) { return x }
+  //+ I :: a -> a
+    , I = function(x) { return x }
 
-    , K = function (x) { return function () { return x } }
+  //+ K :: a -> (_ -> a)
+    , K = function(x) { return function () { return x } }
       
-    , S = function (f, g) {
+  //+ S ::
+    , S = function(f, g) {
         var toFunction = Function.toFunction;
         f = toFunction(f);
         g = toFunction(g);
         return function () { 
-          return f.apply(this, [g.apply(this, arguments)].concat(slice.call(arguments,0)));
+          var return_value_of_g = g.apply(this, arguments)
+            , original_args = slice.call(arguments, 0)
+            , all_args = [return_value_of_g].concat(original_args);
+          return f.apply(this, all_args);
         };
-      };
-  
-  // Higher order methods 
-  // Begin tracking changes to the Function.Prototype
-  _initialFunctionPrototypeState = _startRecordingMethodChanges(Function.prototype);
-  
-  Function.prototype.bind = function (object) {
-    var fn = this,
-        args = slice.call(arguments, 1);
-    return function () {
-      return fn.apply(object, args.concat(slice.call(arguments, 0)));
-    };
-  }
-
-  Function.prototype.saturate = function () {
-    var fn = this,
-        args = slice.call(arguments, 0);
-    return function () { return fn.apply(this, args); };
-  }
-
-  Function.prototype.aritize = function (n) {
-    var fn = this;
-    return function () {
-      return fn.apply(this, slice.call(arguments, 0, n));
-    };
-  }
-
-  Function.prototype.curry = function () {
-    var fn = this,
-        args = slice.call(arguments, 0);
-    return function () {
-      return fn.apply(this, args.concat(slice.call(arguments, 0)));
-    };
-  }
-
-  Function.prototype.rcurry = function () {
-    var fn = this,
-        args = slice(arguments, 0);
-    return function () {
-      return fn.apply(this, slice(arguments, 0).concat(args));
-    };
-  }
-
-  Function.prototype.ncurry = function (n) {
-    var fn = this,
-        largs = slice.call(arguments, 1);
-    return function () {
-      var args = largs.concat(slice.call(arguments, 0));
-      if (args.length<n) {
-        args.unshift(n);
-        return fn.ncurry.apply(fn, args);
       }
-      return fn.apply(this, args);
-    };
-  }
 
-  Function.prototype.rncurry = function (n) {
-    var fn = this,
-        rargs = slice.call(arguments, 1);
-    return function () {
-      var args = slice.call(arguments, 0).concat(rargs);
-      if (args.length < n) {
-        args.unshift(n);
-        return fn.rncurry.apply(fn, args);
-      }
-      return fn.apply(this, args);
-    };
-  }
+  //+ partial :: _ -> f
+    , partial = function() {
+        var fn = this
+          , _ = Function._
+          , args = slice.call(arguments, 0)
+          , subpos = []
+          , i
+          , value
+          ;
 
-  Function.prototype.partial = function () {
-    var fn = this,
-        _ = Function._,
-        args = slice.call(arguments,0),
-        subpos=[],
-        i, value;
-    for(i = 0; i < arguments.length; i++) {
-      arguments[i] == _ && subpos.push(i);
-    }
-    return function () {
-      var specialized = args.concat(slice.call(arguments, subpos.length)),
-          i;
-      for (i = 0; i < Math.min(subpos.length, arguments.length); i++) {
-        specialized[subpos[i]] = arguments[i];
-      }
-      for (i = 0; i < specialized.length; i++) {
-        if (specialized[i] === _) {
-          return fn.partial.apply(fn, specialized);
+        for(i = 0; i < arguments.length; i++) {
+          arguments[i] == _ && subpos.push(i);
         }
-      } 
-      return fn.apply(this,specialized);
-    };
-  }
-  
-  // Alias Function.prototype.partial, for ease of use
-  Function.prototype.p = Function.prototype.partial;
+        return function () {
+          var specialized = args.concat(slice.call(arguments, subpos.length)),
+              i;
+          for (i = 0; i < Math.min(subpos.length, arguments.length); i++) {
+            specialized[subpos[i]] = arguments[i];
+          }
+          for (i = 0; i < specialized.length; i++) {
+            if (specialized[i] === _) {
+              return fn.partial.apply(fn, specialized);
+            }
+          } 
+          return fn.apply(this,specialized);
+        };
+      }
 
-  // Combinator Methods
-  Function.prototype.flip = function () {
-    var fn = this;
-    return function () {
-      var args = slice.call(arguments, 0);
-      args = args.slice(1, 2).concat(args.slice(0, 1)).concat(args.slice(2));
-      return fn.apply(this,args);
-    };
-  }
+  //+ decorateFunctionPrototypeWithPartial :: IO
+    , decorateFunctionPrototypeWithPartial = (function() {
+        Function.prototype.partial = partial;
+        Function.prototype.p = partial;
+      }())
   
-  Function.prototype.uncurry = function () {
-    var fn = this;
-    return function () {
-      var f1 = fn.apply(this, slice.call(arguments, 0, 1));
-      return f1.apply(this, slice.call(arguments, 1));
-    };
-  }
+  //+ decorateFunctionWithToFunction :: IO
+    , decorateFunctionWithToFunction = (function() {
+        Function.toFunction = function(value) {return value.toFunction();}
+        Function.prototype.toFunction = function() { return this; }
+      }())
+    ;
   
-  // Combinator Filtering Methods
-  Function.prototype.prefilterObject = function (filter) {
-    var fn = this;
-    filter = Function.toFunction(filter);
-    return function () {
-      return fn.apply(filter(this), arguments);
-    };
-  }
-  
-  Function.prototype.prefilterAt = function (index, filter) {
-    var fn = this;
-    filter = Function.toFunction(filter);
-    return function () {
-      var args = slice.call(arguments, 0);
-      args[index] = filter.call(this, args[index]);
-      return fn.apply(this, args);
-    };
-  }
-  
-  Function.prototype.prefilterSlice = function (filter, start, end) {
-    var fn = this;
-    filter = Function.toFunction(filter);
-    start = start || 0;
-    return function () {
-      var args = slice.call(arguments, 0),
-          e = end < 0 ? args.length + end : end || args.length;
-      args.splice.apply(args, [start, (e || args.length) - start].concat(filter.apply(this, args.slice(start, e))));
-      return fn.apply(this,args);
-    };
-  }
-
-  // Composition Methods
-  Function.prototype.compose = function(fn) {
-    var self = this,
-        fn = Function.toFunction(fn);
-    return function () {
-      return self.apply(this, [fn.apply(this, arguments)]);
-    };
-  }
-  
-  Function.prototype.sequence = function (fn) {
-    var self = this;
-    fn = Function.toFunction(fn);
-    return function () {
-      return fn.apply(this, [self.apply(this, arguments)]);
-    };
-  }
-  
-  Function.prototype.guard = function (guard, otherwise) {
-    var fn = this,
-        toFunction = Function.toFunction;
-    guard = toFunction(guard || I);
-    otherwise = toFunction(otherwise || I);
-    return function () {
-      return(guard.apply(this, arguments) ? fn : otherwise).apply(this, arguments);
-    };
-  }
-  
-  // Utility Methods
-  Function.prototype.traced = function (name) {
-    var self = this;
-    name = name || self;
-    return function () {
-      window.console && console.info('[', name, 'apply(', this != window && this, ',', arguments, ')' );
-      var result = self.apply(this, arguments);
-      window.console && console.info(']', name, ' -> ', result);
-      return result;
-    };
-  }
-  
-  Function.toFunction = function (value) { return value.toFunction();}
-
-  // In case to-function.js isn't loaded.
-  Function.toFunction = Function.toFunction || K;
-  
-  Function.prototype.toFunction = function () { return this; }
   
   // 
-  // String Methods
+  // Decorate String prototype with higher order methods
   //
+
   String.prototype.lambda = function () {
-    var params=[],
+    var params = [],
         expr = this,
-        sections = expr.ECMAsplit(/\s*->\s*/m);if(sections.length>1){while(sections.length){expr=sections.pop();params=sections.pop().split(/\s*,\s*|\s+/m);sections.length&&sections.push('(function('+params+'){return ('+expr+')})');}}else if(expr.match(/\b_\b/)){params='_';}else{var leftSection=expr.match(/^\s*(?:[+*\/%&|\^\.=<>]|!=)/m),rightSection=expr.match(/[+\-*\/%&|\^\.=<>!]\s*$/m);if(leftSection||rightSection){if(leftSection){params.push('$1');expr='$1'+expr;}
-  if(rightSection){params.push('$2');expr=expr+'$2';}}else{var vars=this.replace(/(?:\b[A-Z]|\.[a-zA-Z_$])[a-zA-Z_$\d]*|[a-zA-Z_$][a-zA-Z_$\d]*\s*:|this|arguments|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g,'').match(/([a-z_$][a-z_$\d]*)/gi)||[];for(var i=0,v;v=vars[i++];)
-  params.indexOf(v)>=0||params.push(v);}}
-  return new Function(params,'return ('+expr+')');
+        sections = expr.ECMAsplit(/\s*->\s*/m);
+    if (sections.length > 1) {
+      while (sections.length) {
+        expr = sections.pop();
+        params = sections.pop().split(/\s*,\s*|\s+/m);
+        sections.length && sections.push('(function('+params+'){return ('+expr+')})');
+      }
+    } else if (expr.match(/\b_\b/)) {
+      params = '_';
+    } else {
+      var leftSection = expr.match(/^\s*(?:[+*\/%&|\^\.=<>]|!=)/m)
+        , rightSection = expr.match(/[+\-*\/%&|\^\.=<>!]\s*$/m)
+        ;
+      if (leftSection || rightSection) {
+        if (leftSection) {
+          params.push('$1');
+          expr = '$1'+expr;
+        }
+        if (rightSection) {
+          params.push('$2');
+          expr = expr+'$2';
+        }
+      } else {
+        var vars = this.replace(/(?:\b[A-Z]|\.[a-zA-Z_$])[a-zA-Z_$\d]*|[a-zA-Z_$][a-zA-Z_$\d]*\s*:|this|arguments|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g,'').match(/([a-z_$][a-z_$\d]*)/gi) || [];
+        for (var i = 0,v; v = vars[i++];)
+          params.indexOf(v)>=0||params.push(v);
+      }
+    }
+    return new Function(params,'return ('+expr+')');
   }
 
   String.prototype.lambda.cache = function () {
@@ -512,15 +404,7 @@
     cached.uncache = function () { proto.lambda = uncached };
     proto.lambda = cached;
   }
-  
-  String.prototype.apply = function (thisArg, args) {
-    return this.toFunction().apply(thisArg, args);
-  }
-  
-  String.prototype.call = function () {
-    return this.toFunction().apply(arguments[0], Array.prototype.slice.call(arguments,1));
-  }
-  
+
   String.prototype.toFunction = function () {
     var body = this;
     if (body.match(/\breturn\b/)) {
@@ -528,42 +412,26 @@
     }
     return this.lambda();
   }
-  
-  String.prototype.ECMAsplit = ('ab'.split(/a*/).length>1?String.prototype.split:function(separator,limit){if(typeof limit!='undefined')
-  throw"ECMAsplit: limit is unimplemented";var result=this.split.apply(this,arguments),re=RegExp(separator),savedIndex=re.lastIndex,match=re.exec(this);if(match&&match.index==0)
-  result.unshift('');re.lastIndex=savedIndex;return result;});
 
-  function _startRecordingMethodChanges(object) {
-    var initialMethods = {}, name;
-    for (name in object) {
-      initialMethods[name] = object[name];
+  function ECMAsplit(separator, limit) {
+    if (typeof limit != 'undefined') {
+      throw "ECMAsplit: limit is unimplemented";
     }
-    function getChangedMethods() {
-      var changedMethods = {};
-      for (var name in object) {
-        if (object[name] != initialMethods[name]) {
-          changedMethods[name] = object[name];
-        }
-      }
-      return changedMethods;
+    var result = this.split.apply(this, arguments)
+      , re = RegExp(separator)
+      , savedIndex = re.lastIndex
+      , match = re.exec(this)
+      ;
+    if (match && match.index == 0) {
+      result.unshift('');
     }
-    return { getChangedMethods: getChangedMethods }
-  }
+    re.lastIndex = savedIndex;
+    return result;
+  };
 
-  function _attachMethodDelegates(methods) {
-    var name;
-    for (name in methods) {
-      functional[name] = functional[name] || (function (name) {
-        var fn = methods[name];
-        return function (object) { 
-          return fn.apply(Function.toFunction(object), slice.call(arguments,1));
-        }
-      })(name);
-    }
-  }
-
-  // _attachMethodDelegates(_initialFunctionPrototypeState.getChangedMethods());
-  // delete _initialFunctionPrototypeState;
+  String.prototype.ECMAsplit = (
+    'ab'.split(/a*/).length > 1 ? String.prototype.split : ECMAsplit
+  );
 
   // Add functions to the "functional" namespace,
   functional.map = map;

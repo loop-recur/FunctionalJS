@@ -12,7 +12,7 @@ describe "functional.js", ->
     expect(typeof functional.compose).toEqual('function')
 
   describe "expose", ->
-    it "can attach functions to the global namespace", ->
+    it "exposes functions on a namespace to the global namespace", ->
       expect(typeof functional.expose).toEqual('function')
       expect(typeof compose).toEqual('function')
 
