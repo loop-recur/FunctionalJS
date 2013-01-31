@@ -3,7 +3,6 @@
   var functional = {} // create "functional" namespace
     , oldFunctional = {}
     , _ = Function._ = {}
-    , _initialFunctionPrototypeState
 
   //+ freeExports :: Bool
     , freeExports = typeof exports == 'object' && exports
@@ -320,6 +319,8 @@
           , i
           , value
           ;
+
+        //var function(x) {}
 
         for(i = 0; i < arguments.length; i++) {
           arguments[i] == _ && subpos.push(i);

@@ -185,16 +185,24 @@ describe "functional.js", ->
       expect(id(1)).toEqual(1)
       expect(id('sweet')).toEqual('sweet')
 
- describe "K", ->
-  it "Returns a constant function that returns whatever argument is passed in", ->
-    expect(K(1)(2)).toEqual(1)
-    expect(K('sweet')('foo')).toEqual('sweet')
+  describe "K", ->
+    it "Returns a constant function that returns whatever argument is passed in", ->
+      expect(K(1)(2)).toEqual(1)
+      expect(K('sweet')('foo')).toEqual('sweet')
 
-  it "has an alias of 'konst'", ->
-    expect(konst(1)(2)).toEqual(1)
-    expect(konst('sweet')('foo')).toEqual('sweet')
+    it "has an alias of 'konst'", ->
+      expect(konst(1)(2)).toEqual(1)
+      expect(konst('sweet')('foo')).toEqual('sweet')
 
- describe "S", ->
-  it "Returns the composition of two functions, applying the first function to the result of the second, AND the original arguments", ->
-    expect(S('+', '_ a b -> a*b')(2,3,4)).toEqual(14)
+  describe "S", ->
+    it "Returns the composition of two functions, applying the first function to the result of the second, AND the original arguments", ->
+      expect(S('+', '_ a b -> a*b')(2,3,4)).toEqual(14)
 
+  describe "partial", ->
+    it "returns a partially applied function", ->
+      expect(sum.partial(2, 3)()).toEqual(5)
+      expect(sum.partial(2)(3)).toEqual(5)
+
+    it "is aliased by 'p'", ->
+      expect(sum.p(2, 3)()).toEqual(5)
+      expect(sum.p(2)(3)).toEqual(5)
