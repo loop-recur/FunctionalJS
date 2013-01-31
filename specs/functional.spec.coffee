@@ -109,15 +109,15 @@ describe "functional.js", ->
   
   describe "and", ->
     it "returns a function that returns 'true' when all arguments applied to function's arguments return true", ->
-      expect(andd('>1', '>2')(3)).toEqual(true)
-      expect(andd('>1', '>2')(2)).toEqual(false)
-      expect(andd('>1', 'error()')(1)).toEqual(false)
+      expect(and_('>1', '>2')(3)).toEqual(true)
+      expect(and_('>1', '>2')(2)).toEqual(false)
+      expect(and_('>1', 'error()')(1)).toEqual(false)
 
   describe "or", ->
     it "returns a function that returns 'true' when one of the arguments applied to the function's arguments returns true", ->
-      expect(orr('>1', '>2')(2)).toEqual(true)
-      expect(orr('>1', '>2')(0)).toEqual(false)
-      expect(orr('>1', 'error()')(2)).toEqual(true)
+      expect(or_('>1', '>2')(2)).toEqual(true)
+      expect(or_('>1', '>2')(0)).toEqual(false)
+      expect(or_('>1', 'error()')(2)).toEqual(true)
 
   describe "some", ->
     xs = [1, 2, 3]
@@ -141,8 +141,8 @@ describe "functional.js", ->
 
   describe "not", ->
     it "returns a function that returns true when the function/argument returns false", ->
-      expect(nott('<2')(3)).toEqual(true)
-      expect(nott('<2')(1)).toEqual(false)
+      expect(not_('<2')(3)).toEqual(true)
+      expect(not_('<2')(1)).toEqual(false)
 
   describe "equal", ->
     it "Returns a function that returns true when this function's arguments applied to that function's are always the same", ->
@@ -168,7 +168,7 @@ describe "functional.js", ->
 
   describe "until", ->
     it "Returns a function that applies first, an argument, then each retur value to a function until a condition is met", ->
-      expect(untill('>10', '2*')(1)).toEqual(16)
+      expect(until_('>10', '2*')(1)).toEqual(16)
 
   describe "zip", ->
     it "Returns an array of arrays, grouping together the values at each index of multiple arrays", ->
