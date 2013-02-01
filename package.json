@@ -12,6 +12,9 @@
     "type": "git",
     "url": "http://github.com/loop-recur/FunctionalJS.git"
   },
+  "dependencies": {
+    "utility": "git://github.com/eschmitt/utility.git"
+  },
   "devDependencies": {
     "jasmine-node": "*"
   },

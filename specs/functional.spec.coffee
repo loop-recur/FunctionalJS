@@ -199,9 +199,17 @@ describe "functional.js", ->
       expect(S('+', '_ a b -> a*b')(2,3,4)).toEqual(14)
 
   describe "partial", ->
+    sum5 = (a, b, c, d, e) ->  a + b + c + d + e
+    three = sum5.partial(1, 1, 1)
+    four = three.partial(1)
+    five = four.partial(1)
+
     it "returns a partially applied function", ->
       expect(sum.partial(2, 3)()).toEqual(5)
       expect(sum.partial(2)(3)).toEqual(5)
+      expect(sum5.partial(1, 1, 1, 1, 1)()).toEqual(5)
+      expect(sum5.partial(1, 1, 1)(1, 1)).toEqual(5)
+      expect(five()).toEqual(5)
 
     it "is aliased by 'p'", ->
       expect(sum.p(2, 3)()).toEqual(5)

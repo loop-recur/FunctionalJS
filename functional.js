@@ -1,16 +1,15 @@
-;(function (window, undefined) {
+;(function (window, exporter, undefined) {
 
-  var functional = {} // create "functional" namespace
-    , oldFunctional = {}
+  var functional = {}
+
+  //+ utility :: Module
+    , utility = exporter ? require('utility') : window.utility
+
+  // TODO see if '_' can be removed without breaking partial() function
+  //- _ :: used for partial() function
     , _ = Function._ = {}
 
-  //+ freeExports :: Bool
-    , freeExports = typeof exports == 'object' && exports
-
-  //+ freeGlobal :: Bool
-    , freeGlobal = typeof global == 'object' && global
-
-  //- slice :: create local reference for faster look-up
+  //+ slice :: create local reference for faster look-up
     , slice = Array.prototype.slice
 
   //+ toArray :: a -> [b]
@@ -320,11 +319,10 @@
           , value
           ;
 
-        //var function(x) {}
-
         for(i = 0; i < arguments.length; i++) {
           arguments[i] == _ && subpos.push(i);
         }
+
         return function () {
           var specialized = args.concat(slice.call(arguments, subpos.length)),
               i;
@@ -434,7 +432,7 @@
     'ab'.split(/a*/).length > 1 ? String.prototype.split : ECMAsplit
   );
 
-  // Add functions to the "functional" namespace,
+  // Add public functions to the "functional" namespace,
   functional.map = map;
   functional.compose = compose;
   functional.sequence = sequence;
@@ -467,60 +465,10 @@
   functional.konst = K;
   functional.S = S;
 
-  // Detect free variable "global" and use it as "window"
-  if (freeGlobal.global === freeGlobal) {
-    window = freeGlobal;
-  }
+  // Attach utility methods an export module
+  window = utility.getFreeGlobal(window)
+  functional.expose = utilty.expose;
+  functional.noConflict = utilty.noConflict('functional', window);
+  utility.export('functional', functional, exporter);
 
-  // Used to restore the original reference in "noConflict()"
-  oldFunctional = window.functional;
-
-  // Reverts the "functional" variable to its previous value and 
-  // returns a reference to the "functional" function.
-  // example:
-  //   var functional = functional.noConflict();
-  functional.noConflict = function noConflict() {
-    window.functional = oldFunctional;
-    return this;
-  }
-
-  // Expose all functions to the global namespace, or specified environment
-  functional.expose = function expose(env) {
-    var fn;
-    env = env || window;
-    for (fn in functional) {
-      if (fn !== 'expose' && functional.hasOwnProperty(fn)) {
-        env[fn] = functional[fn];
-      }
-    }
-  };
-
-  // Expose FunctionalJS library
-  // Some AMD build optimizers, like r.js, check for specific condition
-  // patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // Expose FunctionalJs to the global object even when an AMD loader
-    // is present, in case FunctionalJS was injected by a third-party
-    // script and not intended to be loaded as module. The global
-    // assignment can be reverted in the FunctionalJS module via its
-    // "noConflict()" method.
-    window.functional = functional;
-
-    // Define an anonymous AMD module
-    define(function () { return functional; });
-  }
-
-  // Check for "exports" after "define", in case a build optimizer adds
-  // an "exports" object.
-  else if (freeExports) {
-    // Node.js or RingoJS v0.8.0+
-    if (typeof module == 'object' && module && module.exports == freeExports) {
-      module.exports = functional;
-    }
-    // Narwhal or RingoJS v0.7.0-
-    else {
-      freeExports.functional = functional;
-    }
-  }
-
-}(this));
+}(this, typeof exports == 'object' && exports));
