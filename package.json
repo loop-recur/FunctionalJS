@@ -13,7 +13,7 @@
     "url": "http://github.com/loop-recur/FunctionalJS.git"
   },
   "dependencies": {
-    "utility": "git://github.com/eschmitt/utility.git"
+    "xmod": "git://github.com/eschmitt/xmod.git"
   },
   "devDependencies": {
     "jasmine-node": "*"

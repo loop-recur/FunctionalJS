@@ -7,13 +7,12 @@ describe "functional.js", ->
   times2 = (x) -> x * 2
   subtract = (x, y) -> x - y
 
-  it "loads properly using different module schemes", ->
+  it "loads properly", ->
     expect(functional).not.toBeUndefined()
     expect(typeof functional.compose).toEqual('function')
 
   describe "expose", ->
     it "exposes functions on a namespace to the global namespace", ->
-      expect(typeof functional.expose).toEqual('function')
       expect(typeof compose).toEqual('function')
 
   describe "autoCurry", ->

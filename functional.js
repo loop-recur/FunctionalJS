@@ -1,9 +1,46 @@
-;(function (window, exporter, undefined) {
+;(function (window, global_exports, undefined) {
 
   var functional = {}
 
-  //+ utility :: Module
-    , utility = exporter ? require('utility') : window.utility
+  //+ xmod :: Module
+    , xmod = global_exports ? require('xmod') : window.xmod
+
+  //+ exportModule :: String -> Module -> IO
+    , exportModule = function(name, my_module) {
+        var define_exists = typeof define == 'function'
+          , has_amd_property = define_exists ? typeof define.amd == 'object' && define.amd : false
+          , using_AMD_loader = define_exists && has_amd_property
+          , global_exports = typeof exports == 'object' && exports
+          , global_module = typeof module == 'object' && module
+          , using_nodejs_or_ringojs = global_module ? global_module.exports == global_exports : false
+          ;
+
+        if (using_AMD_loader) {
+          // Expose module to the global object even when an AMD loader
+          // is present, in case this module was injected by a third-party
+          // script and not intended to be loaded as module. The global
+          // assignment can be reverted in the module via its
+          // "noConflict()" method.
+          window[name] = my_module;
+
+          // Define an anonymous AMD module
+          define(function () { return my_module; });
+        }
+
+        // Check for "exports" after "define", in case a build optimizer adds
+        // an "exports" object.
+        else if (global_exports) {
+          if (using_nodejs_or_ringojs) {
+            global_module.exports = my_module;
+          }
+          else { // Narwhal or RingoJS v0.7.0-
+            global_exports[name] = my_module;
+          }
+        }
+        else { // browser or Rhino
+          window[name] = my_module;
+        }
+      }
 
   // TODO see if '_' can be removed without breaking partial() function
   //- _ :: used for partial() function
@@ -349,90 +386,96 @@
         Function.toFunction = function(value) {return value.toFunction();}
         Function.prototype.toFunction = function() { return this; }
       }())
+
+  //+ ECMAsplit :: String -> Int -> String 
+    , ECMAspit = function(separator, limit) {
+        if (typeof limit != 'undefined') {
+          throw "ECMAsplit: limit is unimplemented";
+        }
+        var result = this.split.apply(this, arguments)
+          , re = RegExp(separator)
+          , savedIndex = re.lastIndex
+          , match = re.exec(this)
+          ;
+        if (match && match.index == 0) {
+          result.unshift('');
+        }
+        re.lastIndex = savedIndex;
+        return result;
+      }
+
+  //+ stringLambda :: _ -> f
+    , stringLambda = function() {
+        var params = [],
+            expr = this,
+            sections = expr.ECMAsplit(/\s*->\s*/m);
+        if (sections.length > 1) {
+          while (sections.length) {
+            expr = sections.pop();
+            params = sections.pop().split(/\s*,\s*|\s+/m);
+            sections.length && sections.push('(function('+params+'){return ('+expr+')})');
+          }
+        } else if (expr.match(/\b_\b/)) {
+          params = '_';
+        } else {
+          var leftSection = expr.match(/^\s*(?:[+*\/%&|\^\.=<>]|!=)/m)
+            , rightSection = expr.match(/[+\-*\/%&|\^\.=<>!]\s*$/m)
+            ;
+          if (leftSection || rightSection) {
+            if (leftSection) {
+              params.push('$1');
+              expr = '$1'+expr;
+            }
+            if (rightSection) {
+              params.push('$2');
+              expr = expr+'$2';
+            }
+          } else {
+            var regex = /(?:\b[A-Z]|\.[a-zA-Z_$])[a-zA-Z_$\d]*|[a-zA-Z_$][a-zA-Z_$\d]*\s*:|this|arguments|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g
+              , vars = this.replace(regex,'').match(/([a-z_$][a-z_$\d]*)/gi) || [];
+            for (var i = 0,v; v = vars[i++];)
+              params.indexOf(v)>=0||params.push(v);
+          }
+        }
+        return new Function(params,'return ('+expr+')');
+      }
+
+  //+ cacheStringLambda :: IO
+    , cacheStringLambda = function() {
+        var proto = String.prototype,
+            cache = {},
+            uncached = proto.lambda,
+            cached;
+        cached = function () {
+          var key = '#' + this;
+          return cache[key] || (cache[key] = uncached.call(this));
+        };
+        cached.cached = function () {};
+        cached.uncache = function () { proto.lambda = uncached };
+        proto.lambda = cached;
+      }
+
+  //+ stringToFunction :: _ -> f
+    , stringToFunction = function() {
+        var body = this;
+        if (body.match(/\breturn\b/)) {
+          return new Function(this);
+        }
+        return this.lambda();
+      }
+
+  //+ decorateStringPrototypeWithLambda :: IO
+    , decorateStringPrototypeWithLambda = (function() {
+        String.prototype.lambda = stringLambda;
+        String.prototype.lambda.cache = cacheStringLambda;
+        String.prototype.toFunction = stringToFunction;
+        String.prototype.ECMAsplit = (
+          'ab'.split(/a*/).length > 1 ? String.prototype.split : ECMAsplit
+        );
+      }())
     ;
   
-  
-  // 
-  // Decorate String prototype with higher order methods
-  //
-
-  String.prototype.lambda = function () {
-    var params = [],
-        expr = this,
-        sections = expr.ECMAsplit(/\s*->\s*/m);
-    if (sections.length > 1) {
-      while (sections.length) {
-        expr = sections.pop();
-        params = sections.pop().split(/\s*,\s*|\s+/m);
-        sections.length && sections.push('(function('+params+'){return ('+expr+')})');
-      }
-    } else if (expr.match(/\b_\b/)) {
-      params = '_';
-    } else {
-      var leftSection = expr.match(/^\s*(?:[+*\/%&|\^\.=<>]|!=)/m)
-        , rightSection = expr.match(/[+\-*\/%&|\^\.=<>!]\s*$/m)
-        ;
-      if (leftSection || rightSection) {
-        if (leftSection) {
-          params.push('$1');
-          expr = '$1'+expr;
-        }
-        if (rightSection) {
-          params.push('$2');
-          expr = expr+'$2';
-        }
-      } else {
-        var vars = this.replace(/(?:\b[A-Z]|\.[a-zA-Z_$])[a-zA-Z_$\d]*|[a-zA-Z_$][a-zA-Z_$\d]*\s*:|this|arguments|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g,'').match(/([a-z_$][a-z_$\d]*)/gi) || [];
-        for (var i = 0,v; v = vars[i++];)
-          params.indexOf(v)>=0||params.push(v);
-      }
-    }
-    return new Function(params,'return ('+expr+')');
-  }
-
-  String.prototype.lambda.cache = function () {
-    var proto = String.prototype,
-        cache = {},
-        uncached = proto.lambda,
-        cached;
-    cached = function () {
-      var key = '#' + this;
-      return cache[key] || (cache[key] = uncached.call(this));
-    };
-    cached.cached = function () {};
-    cached.uncache = function () { proto.lambda = uncached };
-    proto.lambda = cached;
-  }
-
-  String.prototype.toFunction = function () {
-    var body = this;
-    if (body.match(/\breturn\b/)) {
-      return new Function(this);
-    }
-    return this.lambda();
-  }
-
-  function ECMAsplit(separator, limit) {
-    if (typeof limit != 'undefined') {
-      throw "ECMAsplit: limit is unimplemented";
-    }
-    var result = this.split.apply(this, arguments)
-      , re = RegExp(separator)
-      , savedIndex = re.lastIndex
-      , match = re.exec(this)
-      ;
-    if (match && match.index == 0) {
-      result.unshift('');
-    }
-    re.lastIndex = savedIndex;
-    return result;
-  };
-
-  String.prototype.ECMAsplit = (
-    'ab'.split(/a*/).length > 1 ? String.prototype.split : ECMAsplit
-  );
-
-  // Add public functions to the "functional" namespace,
+  // Add public functions to the module namespace,
   functional.map = map;
   functional.compose = compose;
   functional.sequence = sequence;
@@ -465,10 +508,9 @@
   functional.konst = K;
   functional.S = S;
 
-  // Attach utility methods an export module
-  window = utility.getFreeGlobal(window)
-  functional.expose = utilty.expose;
-  functional.noConflict = utilty.noConflict('functional', window);
-  utility.export('functional', functional, exporter);
+  // Attach references to helper functions and then export the module
+  functional.expose = xmod.expose;
+  //functional.noConflict = xmod.noConflict('functional', window);
+  exportModule('functional', functional);
 
 }(this, typeof exports == 'object' && exports));
